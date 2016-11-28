@@ -1,0 +1,68 @@
+<!Doctype html>
+<html>
+<head>
+
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script type=text/javascript src = "{{ url_for('static', filename = 'js/form.js') }}"></script>
+<script>
+
+	function initialize()
+	{	
+		var start = document.getElementById('start');
+		var end = document.getElementById('end');
+		
+		var startautoComplete = new google.maps.places.Autocomplete(start);
+		var endautoComplete = new google.maps.places.Autocomplete(end);
+		
+	}
+	
+	google.maps.event.addDomListener(window, 'load', initialize);
+
+	var counter = 1;
+
+    var limit = 5;
+
+    function addInput(divName){
+
+         if (counter == limit)  {
+
+              alert("You have reached the limit of adding " + counter + " Location");
+
+         }
+
+         else {
+
+              var newdiv = document.createElement('div');
+			  var txtId = 'loc' + counter
+              newdiv.innerHTML = "<b>Location " + (counter) + " :<b> <input type='text' class = 'otherlocation' id = '"+txtId+"' size='50' name='others' placeholder='Enter location' autocomplete='off'><br><Br>";
+              document.getElementById(divName).appendChild(newdiv);
+			  var loc = document.getElementById(txtId);
+			  var locautoComplete = new google.maps.places.Autocomplete(loc);
+
+              counter++;
+
+         }
+
+    }
+</script>
+
+</head>
+<body>
+<form   id="frmAddress">
+	<b>Starting point : </b><input id="start" name ="start" type="text" size="50" placeholder="Enter location" autocomplete="off"><br><br>
+	<b>Destination : </b><input id="end" name = "end" type="text" size="50" placeholder="Enter location" autocomplete="off"><br><br>
+	    
+		<div id="waypoint"></div>
+		<input type="button" value="Add another Location" onClick="addInput('waypoint');">
+	
+	<br><br>
+	<input id="submit" type="button" name="submit" value="Get The Fair">
+</form>
+
+<div id="result"></div>
+ 
+
+ 
+</body>
+</html>
