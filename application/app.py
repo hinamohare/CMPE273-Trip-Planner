@@ -132,10 +132,9 @@ def get_Lyft_details():
     global provider
     global providers
     provider["name"] = "Lyft"
-    cost = 0;
-
+    cost = 0
     for i in optimized_route:
-
+        pass
     return
 
 def get_Uber_details():
