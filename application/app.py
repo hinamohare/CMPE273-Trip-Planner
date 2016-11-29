@@ -15,7 +15,6 @@ app = Flask(__name__) #define app using Flask
 
 
 #************************************  database config information    ********************************#
-#app.config['SQLALCHEMY_DATABASE_URI']  = 'mysql+pymysql://root:hina@mysqlserver:3306/expensedb'
 app.config['SQLALCHEMY_DATABASE_URI']  = 'mysql+pymysql://hina:hina@127.0.0.1:3306/address'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
@@ -77,8 +76,13 @@ provider =  {                                     # dict containing information 
             "distance_unit": "mile"}
 
 
-# obtain the geological latitude and longitude using google api
+
 def get_lat_lng(req_url):
+    """
+    obtain the geological latitude and longitude using google api
+    :param req_url:  google api with address of a location to get its latitude and longitude
+    :return:  {"lat": lat, "lng": lng} Dictionary containing latitude and longitude of the location
+    """
     result = {} # stores the latitude and longitude
     response = urllib2.urlopen(req_url) # call the google api using url provided
     json_response = response.read()
@@ -92,8 +96,13 @@ def get_lat_lng(req_url):
     return result
 
 
-# get the latitude and longitude of the intermedate locations without optimum routes
+
 def get_details(List):
+    """
+     get the latitude and longitude of the intermedate locations without optimum routes
+    :param List: List of intermediate locations of the travel
+    :return: list of dictionary containing the address, lattitude and longitude of the intermediate locations
+    """
     original_location_order = []
     for i in List:
         location = i.replace(" ","+")
@@ -106,8 +115,16 @@ def get_details(List):
     return original_location_order
 
 
-# obtain the ordered list of the optimum route for the intermediate locations using google api
+
 def get_optimum_route(locations_list,origin_address, destination_address):
+    """
+    obtain the ordered list of the optimum route for the intermediate locations using google api
+    :param locations_list: list of intermediate locations
+    :param origin_address: starting point address of travel
+    :param destination_address: end point address of travel
+    :return: update the global list optimized_route containing dictionary of
+            intermediate location's address, lattitude and longitude organized in optimum way
+    """
 
     # building the url for getting optimum path
     origin = origin_address.replace(" ","+")
@@ -128,9 +145,15 @@ def get_optimum_route(locations_list,origin_address, destination_address):
         optimized_route.append(locations_list[index])
     return
 
-#************** calculate cost, distance and duration for entire trip for lyft *********************#
+
 def get_Lyft_details():
-    # calculate the lyft data from the starting point to the first location in the optimum route list
+    """
+    calculates cost, distance and duration for entire trip for lyft
+    :return: lyft_data = {"name": name, "car_type": car_type, "total_costs_by_cheapest_car_type": total_cost, "currency_code": "USD",
+                        "total_duration": total_duration, "duration_unit": "minute", "total_distance": total_distance, "distance_unit": "mile"}
+     the lyft ride details for the entire travel
+    """
+    #calculate the lyft data from the starting point to the first location in the optimum route list
     lat1 = start_point["lat"]
     lng1 = start_point["lng"]
     lat2 = optimized_route[0]["lat"]
@@ -178,17 +201,30 @@ def get_Lyft_details():
     return lyft_data
 
 def get_Uber_details():
+    """
+        calculates cost, distance and duration for entire trip for uber
+        :return: uber_data = {"name": name, "car_type": car_type, "total_costs_by_cheapest_car_type": total_cost, "currency_code": "USD",
+                            "total_duration": total_duration, "duration_unit": "minute", "total_distance": total_distance, "distance_unit": "mile"}
+         the uber ride details for the entire travel
+        """
     return
 #***************************************code for user interface*************************************#
 
 
 @app.route('/')
 def index():
-    # return the index page which consists a form for locations input
-   return render_template('index.html')
+    """
+    returns the index page which consists a form for locations input
+    :return: index page
+    """
+    return render_template('index.html')
 
 @app.route('/result',methods = ['POST'])
 def getPrice():
+    """
+    returns the optimum route solution for the input locations based on cost provided by Lyft and Uber
+    :return: json_result
+    """
     global start_point
     global end_point
     input_json = request.get_json(force=True)
@@ -247,6 +283,10 @@ def getPrice():
 
 @app.route('/v1/locations/<int:location_id>', methods=['GET'])
 def retrieve_record(location_id):
+    """
+    :param location_id: id of the location whose geological address information is needed
+    :return: the geological information of the location
+    """
     record = LocationDetails.query.get(location_id)
     record = LocationDetails.query.filter_by(location_id=location_id).first_or_404()
     return jsonify(result=[record.serialize])
@@ -255,6 +295,10 @@ def retrieve_record(location_id):
 # *****************************************  POST **********************************************#
 @app.route('/v1/locations/', methods=['POST'])
 def post_location():
+    """
+    accepts the locations form and store it to database
+    :return: geological information collected using the googel api
+    """
     input_json = request.get_json(force=True)
     name = request.json['name']
     address = request.json['address']
@@ -279,21 +323,30 @@ def post_location():
     return jsonify(result=[record.serialize]), 201
 
 #**********************************************  PUT ***********************************************#
-#         PUT API that will update the location for the particular location_id
+
 @app.route('/v1/locations/<int:location_id>', methods = ['PUT'])
 def put(location_id):
-	input_json = request.get_json(force = True)
-	name = request.json['name'] # get the updated name of the location
-	record = LocationDetails.query.filter_by(location_id = location_id).first_or_404()
-	record.name = name
-	db.session.commit()
-	return "",202
+    """
+    PUT API that will update the location for the particular location_id
+    :param location_id:
+    :return: http 202 response
+    """
+    input_json = request.get_json(force = True)
+    name = request.json['name'] # get the updated name of the location
+    record = LocationDetails.query.filter_by(location_id = location_id).first_or_404()
+    record.name = name
+    db.session.commit()
+    return "",202
 
 #******************************************* DELETE  ***********************************************#
-#       DELETE API that will delete the location for the particular location_id
 
 @app.route('/v1/locations/<int:location_id>', methods =['DELETE'])
 def delete(location_id):
+    """
+    DELETE API that will delete the location for the particular location_id
+    :param location_id:
+    :return: http 204 reponse
+    """
     record = LocationDetails.query.filter_by(location_id = location_id).delete()
     #db.session.delete(session)
     db.session.commit()
