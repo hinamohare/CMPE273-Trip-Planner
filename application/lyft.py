@@ -34,8 +34,15 @@ class LyftApi:
 
     @staticmethod
     def getLyftCost(start_lat, start_lng, end_lat, end_lng):
-        #input: start_lat, start_lng, end_lat, end_lng
-        #return:  name(Lyft), ride type (Lyft_line), cost(USD), time(minute), distance(miles)
+        """
+        :param start_lat: latitude of the starting point (string)
+        :param start_lng: longitude of the  staring point (string)
+        :param end_lat: latitude of the end point (string)
+        :param end_lng: latitude of the end point (string)
+        :return: {name : "Lyft", ride type : "Lyft_line", "costs_by_cheapest_car_type": ride_cost (USD),
+                          "duration": ride_time (minute),
+                          "distance": ride_distance(miles)}
+        """
 
         lyft_cost_url = "https://api.lyft.com/v1/cost?start_lat=" + str(start_lat) + "&start_lng=" + str(start_lng) + "&end_lat=" + str(end_lat) + "&end_lng=" + str(end_lng)
         access_token = LyftApi.getAccessToken()
