@@ -60,14 +60,59 @@ class LocationDetails(db.Model):
             'coordinate': {'lat': self.lat,'lng': self.lng}
         }
 
+    # ***************************** lyft authorization and cost api*******************************
+class LyftApi:
+    @staticmethod
+    def getAccessToken():
+        """get Lyft access token for using lyft api"""
+
+        client_secrete = "WRU95RMFGN9kRV9VOIXhzBEaBcqwTzHV"
+        client_Id = "9M08-8z29d9G"
+        url = "https://api.lyft.com/oauth/token"
+        payload = {"grant_type": "client_credentials", "scope": "public"}
+        data = json.dumps(payload)
+
+        headers = {"Content-Type": "application/json"}
+        resp = requests.post(url, data=data, auth=(client_Id, client_secrete), headers=headers)
+        response = resp.content
+        response_json = json.loads(response)
+        access_token = response_json["access_token"]
+        return access_token
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def getLyftCost(start_lat, start_lng, end_lat, end_lng):
+        """   input: start_lat, start_lng, end_lat, end_lng
+                return:  name(Lyft), ride type (Lyft_line), cost(USD), time(minute), distance(miles)"""
+
+        lyft_cost_url = "https://api.lyft.com/v1/cost?start_lat=" + str(start_lat) + "&start_lng=" + str(start_lng) + "&end_lat=" + str(end_lat) + "&end_lng=" + str(end_lng)
+        access_token = LyftApi.getAccessToken()
+        mytoken = "bearer " + access_token
+        cost_resp = requests.get(lyft_cost_url, headers={'Authorization': mytoken})
+        cost_data = cost_resp.content
+        cost_json = json.loads(cost_data)
+        ride_data = cost_json["cost_estimates"][1]  # cheapest ride is Lyft_line
+        ride_type = ride_data["ride_type"]  # ride type
+        ride_time = ride_data["estimated_duration_seconds"] / 60  # time in minutes
+        ride_cost = ride_data["estimated_cost_cents_max"] / 100  # max cost in USD
+        ride_distance = ride_data["estimated_distance_miles"]  # distance in mile
+        lyft_cost_info = {"service_provider": "Lyft",
+                          "car_type": ride_type,
+                          "costs_by_cheapest_car_type": ride_cost,
+                          "duration": ride_time,
+                          "distance": ride_distance}
+        return lyft_cost_info
+
 #********************************************* functions ****************************************#
-start_point = {}
-end_point = {}
-optimized_route =[]
+start_point = {} # holds starting point name, lat and lng
+end_point = {} # holds end point name, lat and lng
+optimized_route =[] # list of optimized route in the form of {"address":" ", "lat":" ", "lng" : " " }
 Locations = {"start":start_point, "end": end_point, "intermediate_locations" : optimized_route}
 final_result = {}
-providers = []
-provider =  {
+providers = [] #list of service provider data (uber, lyft)
+provider =  {                                     # dict containing information of each service data
             "name" : "",
             "total_costs_by_cheapest_car_type" : 0,
             "currency_code": "USD",
@@ -128,14 +173,54 @@ def get_optimum_route(locations_list,origin_address, destination_address):
         optimized_route.append(locations_list[index])
     return
 
+#************** calculate cost, distance and duration for entire trip for lyft *********************#
 def get_Lyft_details():
-    global provider
-    global providers
-    provider["name"] = "Lyft"
-    cost = 0
-    for i in optimized_route:
-        pass
-    return
+    # calculate the lyft data from the starting point to the first location in the optimum route list
+    lat1 = start_point["lat"]
+    lng1 = start_point["lng"]
+    lat2 = optimized_route[0]["lat"]
+    lng2 = optimized_route[0]["lng"]
+    drive_data = LyftApi.getLyftCost(lat1,lng1,lat2,lng2)
+    total_cost = drive_data["costs_by_cheapest_car_type"]
+    total_distance = drive_data["distance"]
+    total_duration = drive_data["duration"]
+
+    # calculate the lyft data for the intermediate optimum route locations
+    i = 0
+    while i < (len(optimized_route) - 1):
+        lat1 = optimized_route[i]["lat"]
+        lng1 = optimized_route[i]["lng"]
+        lat2 = optimized_route[i+1]["lat"]
+        lng2 = optimized_route[i+1]["lng"]
+        drive_data = LyftApi.getLyftCost(lat1, lng1, lat2, lng2)
+        total_cost = total_cost+ drive_data["costs_by_cheapest_car_type"]
+        total_distance = total_distance + drive_data["distance"]
+        total_duration = total_distance + drive_data["duration"]
+        i += 1
+    # calculate the lyft data for the last intermediate optimum route locations to the end location in the travel plan
+    lat1 = optimized_route[i]["lat"]
+    lng1 = optimized_route[i]["lng"]
+    lat2 = end_point["lat"]
+    lng2 = end_point["lng"]
+    drive_data = LyftApi.getLyftCost(lat1, lng1, lat2, lng2)
+    total_cost = total_cost + drive_data["costs_by_cheapest_car_type"]
+    total_distance = total_distance + drive_data["distance"]
+    total_duration = total_duration + drive_data["duration"]
+
+    # construct the response
+    name = drive_data["service_provider"]
+    car_type = drive_data["car_type"]
+    lyft_data = {
+        "name": name,
+        "car_type": car_type,
+        "total_costs_by_cheapest_car_type": total_cost,
+        "currency_code": "USD",
+        "total_duration": total_duration,
+        "duration_unit": "minute",
+        "total_distance": total_distance,
+        "distance_unit": "mile"
+    }
+    return lyft_data
 
 def get_Uber_details():
     return
@@ -175,11 +260,26 @@ def getPrice():
     intermediate_address_lat_lng = get_details(original_list) # get the latitude and longitude of the intermediate locations
     print(intermediate_address_lat_lng)
 
-    get_optimum_route(intermediate_address_lat_lng, startlocation, endlocation) # get the optimized route
+    get_optimum_route(intermediate_address_lat_lng, startlocation, endlocation) # get the optimized route using google api
     print (optimized_route)
 
-    get_Lyft_details()
-    get_Uber_details()
+    lyft_data = get_Lyft_details() # get the cost, duration and distance for entire trip with lyft
+    providers.append(lyft_data)  # append the result to the list of service providers
+
+
+    #uber_data = get_Uber_details() # get the cost, duration and distance for entire trip with uber
+    #providers.append(uber_data) # append the result to the list of service providers
+    best_route = []
+    for L in optimized_route:
+        best_route.append(L["address"])
+
+    # construct the final response
+    final_result["start"] = start_point["address"]
+    final_result["end"] = end_point["address"]
+    final_result["best_route_by_costs"]= optimized_route
+    final_result["providers"] = providers
+
+    print final_result
     return "success"
 
 
@@ -226,7 +326,7 @@ def post_location():
 @app.route('/v1/locations/<int:location_id>', methods = ['PUT'])
 def put(location_id):
 	input_json = request.get_json(force = True)
-	name = request.json['name']
+	name = request.json['name'] # get the updated name of the location
 	record = LocationDetails.query.filter_by(location_id = location_id).first_or_404()
 	record.name = name
 	db.session.commit()
