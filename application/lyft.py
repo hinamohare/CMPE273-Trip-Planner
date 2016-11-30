@@ -3,14 +3,12 @@ import requests
 
 #***************************** lyft authorization and cost api*******************************#
 class LyftApi:
-
     def __init__(self):
         pass
 
     @staticmethod
     def getAccessToken():
         #get Lyft access token for using lyft api
-
         client_secrete = "WRU95RMFGN9kRV9VOIXhzBEaBcqwTzHV"
         client_Id = "9M08-8z29d9G"
         url = "https://api.lyft.com/oauth/token"
