@@ -22,7 +22,6 @@ class LyftApi:
         access_token = response_json["access_token"]
         return access_token
 
-
     @staticmethod
     def getLyftCost(start_lat, start_lng, end_lat, end_lng):
         """
