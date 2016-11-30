@@ -12,6 +12,7 @@ import requests
 from flask import Response
 from lyft import LyftApi
 from uber import UberApi
+from model import *
 app = Flask(__name__) #define app using Flask
 
 
@@ -21,7 +22,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
 #**********************************   database model  ************************************************#
-db = SQLAlchemy(app)
+#db = SQLAlchemy(app)
 
 class LocationDetails(db.Model):
     __tablename__ = 'LocationDetails'
@@ -351,6 +352,7 @@ def getPrice():
 
     startlocation = request.json["startlocation"] # starting point of the travel
     location = startlocation.replace(" ","+")
+    print location
     result = get_lat_lng("http://maps.google.com/maps/api/geocode/json?address="+location+"&sensor=false")
     start_point["address"]= startlocation
     start_point["lat"] = result["lat"]
@@ -478,7 +480,23 @@ def delete(location_id):
     #db.session.delete(session)
     db.session.commit()
     return "",204
+    
+#************************************Trip Planner APIs - POST**************************************#
 
+@app.route('/v1/trips/', methods=['POST'])
+def post_trip():
+    input_json = request.get_json(force=True)
+    start = request.json['start']
+    end = request.json['end']
+    others = request.json['others']
+
+    #insert the trip details into the database
+    trip = TripDetails(start,end,others,state,zip,createdOn, updatedOn, lat, lng)
+    db.session.add(trip)
+    db.session.commit()
+    record = TripDetails.query.filter_by(trip_id=trip.trip_id).first_or_404()
+    #return the trip details to the user in json form
+    return jsonify(result=[record.serialize]), 201
 
 #************************************run the main program**************************************#
 
