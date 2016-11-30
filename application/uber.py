@@ -2,6 +2,8 @@ import json
 import requests
 #***************************** uber authorization and cost api*******************************#
 class UberApi:
+    def __init__(self):
+        pass
     @staticmethod
     def getUberCost(start_lat, start_lng, end_lat, end_lng):
         """
