@@ -11,6 +11,7 @@ from sqlalchemy import DDL
 import requests
 from flask import Response
 from lyft import LyftApi
+from uber import UberApi
 app = Flask(__name__) #define app using Flask
 
 
@@ -200,14 +201,60 @@ def get_Lyft_details():
     }
     return lyft_data
 
+
 def get_Uber_details():
     """
-        calculates cost, distance and duration for entire trip for uber
-        :return: uber_data = {"name": name, "car_type": car_type, "total_costs_by_cheapest_car_type": total_cost, "currency_code": "USD",
-                            "total_duration": total_duration, "duration_unit": "minute", "total_distance": total_distance, "distance_unit": "mile"}
-         the uber ride details for the entire travel
-        """
-    return
+    calculates cost, distance and duration for entire trip for uber
+    :return: uber_data = {"name": name, "car_type": car_type, "total_costs_by_cheapest_car_type": total_cost, "currency_code": "USD",
+                        "total_duration": total_duration, "duration_unit": "minute", "total_distance": total_distance, "distance_unit": "mile"}
+     the uber ride details for the entire travel
+    """
+    #calculate the uber data from the starting point to the first location in the optimum route list
+    lat1 = start_point["lat"]
+    lng1 = start_point["lng"]
+    lat2 = optimized_route[0]["lat"]
+    lng2 = optimized_route[0]["lng"]
+    drive_data = UberApi.getUberCost(lat1,lng1,lat2,lng2)
+    total_cost = drive_data["costs_by_cheapest_car_type"]
+    total_distance = drive_data["distance"]
+    total_duration = drive_data["duration"]
+
+    # calculate the uber data for the intermediate optimum route locations
+    i = 0
+    while i < (len(optimized_route) - 1):
+        lat1 = optimized_route[i]["lat"]
+        lng1 = optimized_route[i]["lng"]
+        lat2 = optimized_route[i+1]["lat"]
+        lng2 = optimized_route[i+1]["lng"]
+        drive_data = UberApi.getUberCost(lat1, lng1, lat2, lng2)
+        total_cost = total_cost+ drive_data["costs_by_cheapest_car_type"]
+        total_distance = total_distance + drive_data["distance"]
+        total_duration = total_distance + drive_data["duration"]
+        i += 1
+    # calculate the uber data for the last intermediate optimum route locations to the end location in the travel plan
+    lat1 = optimized_route[i]["lat"]
+    lng1 = optimized_route[i]["lng"]
+    lat2 = end_point["lat"]
+    lng2 = end_point["lng"]
+    drive_data = UberApi.getUberCost(lat1, lng1, lat2, lng2)
+    total_cost = total_cost + drive_data["costs_by_cheapest_car_type"]
+    total_distance = total_distance + drive_data["distance"]
+    total_duration = total_duration + drive_data["duration"]
+
+    # construct the response
+    name = drive_data["service_provider"]
+    car_type = drive_data["car_type"]
+    uber_data = {
+        "name": name,
+        "car_type": car_type,
+        "total_costs_by_cheapest_car_type": total_cost,
+        "currency_code": "USD",
+        "total_duration": total_duration,
+        "duration_unit": "minute",
+        "total_distance": total_distance,
+        "distance_unit": "mile"
+    }
+    return uber_data
 #***************************************code for user interface*************************************#
 
 
@@ -228,7 +275,7 @@ def getPrice():
     global start_point
     global end_point
     input_json = request.get_json(force=True)
-    print input_json
+    #print input_json
 
     startlocation = request.json["startlocation"] # starting point of the travel
     location = startlocation.replace(" ","+")
@@ -236,7 +283,7 @@ def getPrice():
     start_point["address"]= startlocation
     start_point["lat"] = result["lat"]
     start_point["lng"] = result["lng"]
-    print (start_point)
+    #print (start_point)
 
     endlocation = request.json["endlocation"] # end point of the travel
     location = endlocation.replace(" ", "+")
@@ -244,23 +291,23 @@ def getPrice():
     end_point["address"] = endlocation
     end_point["lat"] = result["lat"]
     end_point["lng"] = result["lng"]
-    print(end_point)
+    #print(end_point)
 
     original_list = request.json["intermidiatelocation"] # list containing the intermediate locations
-    print (original_list)
+    #print (original_list)
 
     intermediate_address_lat_lng = get_details(original_list) # get the latitude and longitude of the intermediate locations
     print(intermediate_address_lat_lng)
 
     get_optimum_route(intermediate_address_lat_lng, startlocation, endlocation) # get the optimized route using google api
-    print (optimized_route)
+    #print (optimized_route)
 
     lyft_data = get_Lyft_details() # get the cost, duration and distance for entire trip with lyft
     providers.append(lyft_data)  # append the result to the list of service providers
 
 
-    #uber_data = get_Uber_details() # get the cost, duration and distance for entire trip with uber
-    #providers.append(uber_data) # append the result to the list of service providers
+    uber_data = get_Uber_details() # get the cost, duration and distance for entire trip with uber
+    providers.append(uber_data) # append the result to the list of service providers
     best_route = []
     for L in optimized_route:
         best_route.append(L["address"])
@@ -271,8 +318,8 @@ def getPrice():
     final_result["best_route_by_costs"]= optimized_route
     final_result["providers"] = providers
 
-    print final_result
     json_result = json.dumps(final_result)
+    print json_result
     return json_result
 
 

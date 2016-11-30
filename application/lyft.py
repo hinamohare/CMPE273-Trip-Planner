@@ -1,16 +1,7 @@
-import urllib2
-
-from flask import Flask, render_template
-from flask import jsonify, request, session # import objects from the flask module
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 import json
-from sqlalchemy import event
-from sqlalchemy import DDL
 import requests
-from flask import Response
 
-#***************************** lyft authorization and cost api*******************************
+#***************************** lyft authorization and cost api*******************************#
 class LyftApi:
     @staticmethod
     def getAccessToken():
