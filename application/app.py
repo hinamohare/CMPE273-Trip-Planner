@@ -110,11 +110,10 @@ def get_details(List):
     original_location_order = []
     for i in List:
         location = i.replace(" ","+")
-        request_url = ("http://maps.google.com/maps/api/geocode/json?address="+location+"&sensor=false")
         geo_location = get_location_db(location, "intermediate")
         lat = geo_location.lat
         lng = geo_location.lng
-        original_location_order.append({"address" : i, "lat": lat, "lng" : lng})
+        original_location_order.append({"address" : i, "lat": lat, "lng" : lng, "location_id":geo_location})
 
     return original_location_order
 
@@ -374,9 +373,9 @@ def getPrice():
     print "\n\n no_inter_points = ", no_inter_points
     if no_inter_points>0 :
         intermediate_address_lat_lng = get_details(original_list) # get the latitude and longitude of the intermediate locations
-        print(intermediate_address_lat_lng)
+        #print(intermediate_address_lat_lng)
         get_optimum_route(intermediate_address_lat_lng, startlocation, endlocation) # get the optimized route using google api
-        print (optimized_route)
+        #print (optimized_route)
         
     lyft_data = get_Lyft_details() # get the cost, duration and distance for entire trip with lyft
     providers.append(lyft_data)  # append the result to the list of service providers
@@ -395,6 +394,20 @@ def getPrice():
     final_result["best_route_by_costs"]= best_route
     final_result["providers"] = providers
 
+    optimal_locs = []
+    for interLoc in optimized_route:
+        locan = interLoc["address"].replace(" ","+")
+        result = get_location_db(locan, "end")
+        optimal_locs.append(result.location_id)
+    
+    best_route_str = str(optimal_locs).strip('[]')
+    #print "\n\n\n\n\n best route   ", best_route_str   
+    #insert the trip details into the database
+    trip = TripDetails(adrs.location_id,result.location_id,best_route_str,uber_data["total_costs_by_cheapest_car_type"],uber_data["total_duration"],uber_data["total_distance"],lyft_data["total_costs_by_cheapest_car_type"],lyft_data["total_duration"],lyft_data["total_distance"])
+    db.session.add(trip)
+    db.session.commit()
+    record = TripDetails.query.filter_by(trip_id=trip.trip_id).first_or_404()
+    
     json_result = json.dumps(final_result)
     print json_result
     return json_result
@@ -530,12 +543,42 @@ def delete(location_id):
 @app.route('/v1/trips/', methods=['POST'])
 def post_trip():
     input_json = request.get_json(force=True)
-    start = request.json['start']
-    end = request.json['end']
-    others = request.json['others']
+    start = request.json["start"]
+    end = request.json["end"]
+    others = request.json["others"]
 
+    startLoc = LocationDetails.query.filter_by(location_id=start).first_or_404()
+    startLoc.address += startLoc.city
+    startLoc.address += startLoc.state
+    startLoc.address += startLoc.zip
+    endLoc = LocationDetails.query.filter_by(location_id=end).first_or_404()
+    endLoc.address += endLoc.city
+    endLoc.address += endLoc.state
+    endLoc.address += endLoc.zip
+    
+    original_locs = []
+    for interLoc in others:
+        geo_location = LocationDetails.query.filter_by(location_id=interLoc).first_or_404()
+        lat = geo_location.lat
+        lng = geo_location.lng
+        adrs = geo_location.address + geo_location.city + geo_location.state + geo_location.zip
+        original_locs.append({"address" : adrs, "lat": lat, "lng" : lng, "location_id" : interLoc})
+        
+    get_optimum_route(original_locs, startlocation, endlocation) # get the optimized route using google api
+          
+    optimal_locs = []
+    for interLoc in optimized_route:
+        locan = interLoc["address"].replace(" ","+")
+        result = get_location_db(locan, "end")
+        optimal_locs.append(result.location_id)
+    
+    best_route_str = str(optimal_locs).strip('[]')
+    
+    lyft_data = get_Lyft_details()
+    uber_data = get_Uber_details() 
+    
     #insert the trip details into the database
-    trip = TripDetails(start,end,others,state,zip,createdOn, updatedOn, lat, lng)
+    trip = TripDetails(start,end,best_route_str,uber_data["total_costs_by_cheapest_car_type"],uber_data["total_duration"],uber_data["total_distance"],lyft_data["total_costs_by_cheapest_car_type"],lyft_data["total_duration"],lyft_data["total_distance"])
     db.session.add(trip)
     db.session.commit()
     record = TripDetails.query.filter_by(trip_id=trip.trip_id).first_or_404()

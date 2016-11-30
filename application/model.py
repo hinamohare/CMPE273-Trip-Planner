@@ -19,7 +19,7 @@ class TripDetails(db.Model):
     trip_id = db.Column('trip_id', db.Integer, primary_key=True)
     start_location = db.Column('start_location', db.Integer)
     end_location = db.Column('end_location', db.Integer)
-    best_route = db.Column('best_route', db.String(50))
+    best_route = db.Column('best_route', db.String(250))
     uber_cost = db.Column('uber_cost', db.Float)
     uber_duration = db.Column('uber_duration', db.Float)
     uber_distance = db.Column('uber_distance', db.Float)
