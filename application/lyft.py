@@ -3,6 +3,9 @@ import requests
 
 #***************************** lyft authorization and cost api*******************************#
 class LyftApi:
+    def __init__(self):
+        pass
+    
     @staticmethod
     def getAccessToken():
         #get Lyft access token for using lyft api
@@ -20,8 +23,6 @@ class LyftApi:
         access_token = response_json["access_token"]
         return access_token
 
-    def __init__(self):
-        pass
 
     @staticmethod
     def getLyftCost(start_lat, start_lng, end_lat, end_lng):
