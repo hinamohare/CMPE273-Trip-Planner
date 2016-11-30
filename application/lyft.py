@@ -3,6 +3,7 @@ import requests
 
 #***************************** lyft authorization and cost api*******************************#
 class LyftApi:
+
     def __init__(self):
         pass
 
@@ -27,6 +28,7 @@ class LyftApi:
     @staticmethod
     def getLyftCost(start_lat, start_lng, end_lat, end_lng):
         """
+        This function calculates the different ride parameters for the travel
         :param start_lat: latitude of the starting point (string)
         :param start_lng: longitude of the  staring point (string)
         :param end_lat: latitude of the end point (string)
