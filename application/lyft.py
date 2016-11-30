@@ -5,7 +5,7 @@ import requests
 class LyftApi:
     def __init__(self):
         pass
-    
+
     @staticmethod
     def getAccessToken():
         #get Lyft access token for using lyft api
