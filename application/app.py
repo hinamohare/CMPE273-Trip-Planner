@@ -4,6 +4,7 @@ import urllib2
 from flask import Flask, render_template
 from flask import jsonify, request, session # import objects from the flask module
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_, and_
 from datetime import datetime
 import json
 from sqlalchemy import event
@@ -13,6 +14,7 @@ from flask import Response
 from lyft import LyftApi
 from uber import UberApi
 from model import *
+from address import AddressParser, Address
 app = Flask(__name__) #define app using Flask
 
 
@@ -28,7 +30,7 @@ class LocationDetails(db.Model):
     __tablename__ = 'LocationDetails'
     location_id = db.Column('location_id', db.Integer, primary_key=True)
     name = db.Column('name', db.String(50))
-    address = db.Column('address', db.String(50))
+    address = db.Column('address', db.String(250))
     city = db.Column('city', db.String(30))
     state = db.Column('state', db.String(30))
     zip = db.Column('zip', db.String(10))
@@ -109,9 +111,9 @@ def get_details(List):
     for i in List:
         location = i.replace(" ","+")
         request_url = ("http://maps.google.com/maps/api/geocode/json?address="+location+"&sensor=false")
-        geo_location = get_lat_lng(request_url)
-        lat = geo_location["lat"]
-        lng = geo_location["lng"]
+        geo_location = get_location_db(location, "intermediate")
+        lat = geo_location.lat
+        lng = geo_location.lng
         original_location_order.append({"address" : i, "lat": lat, "lng" : lng})
 
     return original_location_order
@@ -347,31 +349,26 @@ def getPrice():
     global end_point
     global no_inter_points
     input_json = request.get_json(force=True)
-    print "\n Input json \n"
-    print input_json
+    #print "\n Input json \n", input_json
 
     startlocation = request.json["startlocation"] # starting point of the travel
     location = startlocation.replace(" ","+")
-    print location
-    result = get_lat_lng("http://maps.google.com/maps/api/geocode/json?address="+location+"&sensor=false")
+    adrs = get_location_db(location, "start")
+    print "\n\n\n new func    ", adrs.lat, adrs.lng
+    start_point["lat"] = adrs.lat
+    start_point["lng"] = adrs.lng
     start_point["address"]= startlocation
-    start_point["lat"] = result["lat"]
-    start_point["lng"] = result["lng"]
-    print "\n Starting point \n"
-    print (start_point)
-
+    
     endlocation = request.json["endlocation"] # end point of the travel
     location = endlocation.replace(" ", "+")
-    result = get_lat_lng("http://maps.google.com/maps/api/geocode/json?address=" + location + "&sensor=false")
+    result = get_location_db(location, "end")
     end_point["address"] = endlocation
-    end_point["lat"] = result["lat"]
-    end_point["lng"] = result["lng"]
-    print "\n End point \n"
-    print(end_point)
-
+    end_point["lat"] = result.lat
+    end_point["lng"] = result.lng
+    print "\n End point \n", end_point
+    
     original_list = request.json["intermidiatelocation"] # list containing the intermediate locations
-    print "intermidiatelocation \n"
-    print (original_list)
+    #print "intermidiatelocation \n", original_list
 
     no_inter_points = len(original_list)
     print "\n\n no_inter_points = ", no_inter_points
@@ -380,8 +377,6 @@ def getPrice():
         print(intermediate_address_lat_lng)
         get_optimum_route(intermediate_address_lat_lng, startlocation, endlocation) # get the optimized route using google api
         print (optimized_route)
-    else:
-        print "\n\n No intermediate points"
         
     lyft_data = get_Lyft_details() # get the cost, duration and distance for entire trip with lyft
     providers.append(lyft_data)  # append the result to the list of service providers
@@ -404,8 +399,57 @@ def getPrice():
     print json_result
     return json_result
 
-
-
+# ****************************************Get location from db function*********************************************#
+def get_location_db(location, name):
+    """
+    Search the location in db. If found return. else get its lat and long from google and store in db.
+    :param location: actual location
+    :name :name of the location
+    :return: the geological information of the location
+    """
+    ap = AddressParser()
+    loc_address = ap.parse_address(location)
+    street = ""
+    if loc_address.house_number is not None:
+                    street += loc_address.house_number
+    if loc_address.street_prefix is not None:
+                    street += loc_address.street_prefix
+    if loc_address.street is not None:
+                    street += loc_address.street
+    if loc_address.street_suffix is not None:
+                    street += loc_address.street_suffix
+                    
+    loc_city = ""
+    if loc_address.city is not None:
+                    loc_city = loc_address.city   
+    loc_state = ""
+    if loc_address.state is not None:
+                    loc_state = loc_address.state
+    loc_zip = ""
+    if loc_address.zip is not None:
+                    loc_zip = loc_address.zip
+                    
+    if LocationDetails.query.filter(LocationDetails.address==street,LocationDetails.city==loc_city,LocationDetails.state==loc_state,LocationDetails.zip==loc_zip).count() > 0:
+        print "\n\n\n Address found", location
+        record = LocationDetails.query.filter(LocationDetails.address==street,LocationDetails.city==loc_city,LocationDetails.state==loc_state,LocationDetails.zip==loc_zip).first_or_404()
+        return record
+    
+    print "\n\n\n Address NOT found", location
+        
+    # get the geolocation of the address
+    geo_location = get_lat_lng("http://maps.google.com/maps/api/geocode/json?address="+location+"&sensor=false")
+    lat = geo_location["lat"]
+    lng = geo_location["lng"]
+    createdOn = datetime.now()
+    updatedOn = datetime.now()
+    
+    #insert the address details into the database
+    record = LocationDetails(name,street,loc_city,loc_state,loc_zip,createdOn, updatedOn, lat, lng)
+    db.session.add(record)
+    db.session.commit()
+    
+    record = LocationDetails.query.filter(LocationDetails.address==street,LocationDetails.city==loc_city,LocationDetails.state==loc_state,LocationDetails.zip==loc_zip).first_or_404()
+    return record
 
 # ****************************************CRUST API*********************************************#
 # ***************************************    GET ***********************************************#
