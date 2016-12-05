@@ -52,3 +52,25 @@ class TripDetails(db.Model):
             'total_duration' : self.lyft_duration, 'duration_unit': 'minute',
             'total_distance' : self.lyft_distance, 'distance_unit': 'mile'}]
         }
+        
+class TripReviews(db.Model):
+    __tablename__ = 'Tripreviews'
+    review_id = db.Column('review_id', db.Integer, primary_key=True)
+    trip_id = db.Column('trip_id', db.Integer)
+    rating = db.Column('rating', db.Integer)
+    review = db.Column('review', db.String(250))
+
+    def __init__(self, tripId, rating, review):
+        self.trip_id = tripId
+        self.rating = rating
+        self.review = review
+        
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'review_id':self.review_id,
+            'rating': self.trip_id,
+            'rating': self.rating,
+            'review': self.review
+        }
