@@ -115,8 +115,47 @@ def get_details(List):
         lng = geo_location.lng
         original_location_order.append({"address" : i, "lat": lat, "lng" : lng, "location_id":geo_location})
 
-    return original_location_order
+    return original_location_order  
+    
+def get_best_route(locations_list,origin_address, destination_address):
+    global optimized_route
+    del optimized_route[:]
+    src = origin_address
 
+    print "\n get_best_route optimized_route :", len(optimized_route)
+    i = 0
+    while i < (len(locations_list) - 1):
+        print "\n get_best_route for :", i
+        min = 99999
+        nxt = locations_list[0]
+        for loc in locations_list:
+            dst = get_distance(src, loc)
+            if dst < min:
+                min = dst
+                nxt = loc
+        optimized_route.append(nxt)
+        locations_list.remove(nxt)
+        src = nxt
+
+    optimized_route.append(locations_list[0])  #append the remaining intermediate location
+    for loc in optimized_route:
+        print "\n\n optimized route : ", loc
+    
+def get_distance(origin_address, destination_address):
+    originLat = str(origin_address["lat"])
+    originLng = str(origin_address["lng"])
+    destLat = str(destination_address["lat"])
+    destLng = str(destination_address["lng"])
+    
+    url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins="+originLat+","+originLng+"&destinations="+destLat+","+destLng+"&key=AIzaSyAmsECtTD88DUJDFgf_iq-YFLYHkRyLBi8"
+    response = urllib2.urlopen(url)  # call the google api using url provided
+    json_response = response.read()
+    jsonList = json.loads(json_response)
+    
+    dist = jsonList["rows"][0]["elements"][0]["distance"]["text"]
+    d = dist.split()
+    s = float(d[0])
+    return s
 
 
 def get_optimum_route(locations_list,origin_address, destination_address):
@@ -353,7 +392,7 @@ def getPrice():
     startlocation = request.json["startlocation"] # starting point of the travel
     location = startlocation.replace(" ","+")
     adrs = get_location_db(location, "start")
-    print "\n\n\n new func    ", adrs.lat, adrs.lng
+    #print "\n\n\n new func    ", adrs.lat, adrs.lng
     start_point["lat"] = adrs.lat
     start_point["lng"] = adrs.lng
     start_point["address"]= startlocation
@@ -364,18 +403,22 @@ def getPrice():
     end_point["address"] = endlocation
     end_point["lat"] = result.lat
     end_point["lng"] = result.lng
-    print "\n End point \n", end_point
+    #print "\n End point \n", end_point
+    
+    dist = get_distance(start_point,end_point)
+    print "\n\n The distnce is ", dist
     
     original_list = request.json["intermidiatelocation"] # list containing the intermediate locations
     #print "intermidiatelocation \n", original_list
 
     no_inter_points = len(original_list)
-    print "\n\n no_inter_points = ", no_inter_points
+    #print "\n\n no_inter_points = ", no_inter_points
     if no_inter_points>0 :
         intermediate_address_lat_lng = get_details(original_list) # get the latitude and longitude of the intermediate locations
         #print(intermediate_address_lat_lng)
-        get_optimum_route(intermediate_address_lat_lng, startlocation, endlocation) # get the optimized route using google api
-        #print (optimized_route)
+        #get_optimum_route(intermediate_address_lat_lng, startlocation, endlocation) # get the optimized route using google api
+        get_best_route(intermediate_address_lat_lng, start_point, end_point)
+        print "\n\n optimized_route = ", optimized_route
         
     lyft_data = get_Lyft_details() # get the cost, duration and distance for entire trip with lyft
     providers.append(lyft_data)  # append the result to the list of service providers
@@ -409,7 +452,7 @@ def getPrice():
     record = TripDetails.query.filter_by(trip_id=trip.trip_id).first_or_404()
     
     json_result = json.dumps(final_result)
-    print json_result
+    print "\n\n\n final answer : ",json_result
     return json_result
 
 # ****************************************Get location from db function*********************************************#
@@ -443,11 +486,11 @@ def get_location_db(location, name):
                     loc_zip = loc_address.zip
                     
     if LocationDetails.query.filter(LocationDetails.address==street,LocationDetails.city==loc_city,LocationDetails.state==loc_state,LocationDetails.zip==loc_zip).count() > 0:
-        print "\n\n\n Address found", location
+        #print "\n\n\n Address found", location
         record = LocationDetails.query.filter(LocationDetails.address==street,LocationDetails.city==loc_city,LocationDetails.state==loc_state,LocationDetails.zip==loc_zip).first_or_404()
         return record
     
-    print "\n\n\n Address NOT found", location
+    #print "\n\n\n Address NOT found", location
         
     # get the geolocation of the address
     geo_location = get_lat_lng("http://maps.google.com/maps/api/geocode/json?address="+location+"&sensor=false")
