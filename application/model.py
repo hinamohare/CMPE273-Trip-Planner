@@ -70,7 +70,7 @@ class TripReviews(db.Model):
         """Return object data in easily serializeable format"""
         return {
             'review_id':self.review_id,
-            'rating': self.trip_id,
+            'trip_id': self.trip_id,
             'rating': self.rating,
             'review': self.review
         }

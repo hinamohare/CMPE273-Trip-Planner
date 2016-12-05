@@ -707,6 +707,7 @@ def post_trip():
 
 @app.route('/v1/reviews/', methods=['POST'])
 def post_review():
+    print "got request"
     input_json = request.get_json(force=True)
     trip_id = request.json["trip_id"]
     rating = request.json["rating"]
@@ -714,16 +715,19 @@ def post_review():
   
     #insert the trip review into the database
     tripReview = TripReviews(trip_id,rating,review)
-    db.session.add(tripReview)
-    db.session.commit()
-    record = TripReviews.query.filter_by(trip_id=tripReview.review_id).first_or_404()
+    rs = db.session.add(tripReview)
+    db.session.flush()
+    rs = db.session.commit()
+    record = TripReviews.query.filter_by(review_id=tripReview.review_id).first_or_404()
+    
     #return the review details to the user in json form
     return jsonify(result=[record.serialize]), 201
     
 @app.route('/v1/bestreviews/', methods=['GET'])
 def get_best_reviews():
-    record = TripReviews.query.filter_by(rating=5).first_or_404()
-    return jsonify(result=[record.serialize])
+    record = TripReviews.query.filter_by(rating=5)
+    return jsonify(json_list=[i.serialize for i in record.all()])
+
 #************************************run the main program**************************************#
 
 if __name__ == "__main__" :
