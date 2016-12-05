@@ -1,5 +1,6 @@
 # coding=utf-8
 import urllib2
+import itertools
 
 from flask import Flask, render_template
 from flask import jsonify, request, session # import objects from the flask module
@@ -376,7 +377,83 @@ def index():
     :return: index page
     """
     return render_template('index.html')
-
+    
+def get_best_routeDj(locations_list,origin_address, destination_address):
+    print "\n\n\n get_best_routeDj 1"
+    global optimized_route
+    del optimized_route[:]
+    interLocsLen = len(locations_list)
+    if interLocsLen == 1:
+        optimized_route.append(locations_list[0])
+        return
+        
+    print "\n\n\n get_best_routeDj 2"
+    
+    distancesMatrix =  [[99999 for _ in range(interLocsLen)] for _ in range(interLocsLen)]
+    
+    distFrmStart = []   
+    indx = 0
+    while indx < interLocsLen:
+        distFrmStart.append(get_distance(origin_address, locations_list[indx]))
+        indx = indx + 1
+    
+    #print "\n\n\n get_best_routeDj 3"
+    
+    distToEnd = []
+    indx = 0
+    while indx < interLocsLen:
+        distToEnd.append(get_distance(locations_list[indx], destination_address))
+        indx = indx + 1
+    
+    #print "\n\n\n get_best_routeDj 4"
+    
+    index1 = 0    
+    index2 = 0
+    while index1 < interLocsLen:
+        while index2 < interLocsLen:
+            #print " intered with ", index1, index2
+            if index1 == index2:
+                distancesMatrix[index1][index2] = 99999
+            else:
+                dst = get_distance(locations_list[index1], locations_list[index2])
+                #print "\n Cost1 is ", dst
+                distancesMatrix[index1][index2] = dst
+            index2 = index2 + 1
+        index1= index1 + 1
+        index2 = 0
+        
+    paths = []
+    locs = []
+    minCost = 99999
+    for indx in range(0, interLocsLen):
+        locs.append(indx)
+    for L in range(0, interLocsLen+1):
+        for subset in itertools.permutations(locs, L):
+            if len(subset) == interLocsLen:
+                #print "\n Full path found : ", subset
+                
+                curCost = 0
+                for i in range(0,interLocsLen-1):
+                    srcIndx = subset[i]
+                    destIndx = subset[i+1]
+                    #print "\n Cost is ", srcIndx, destIndx, distancesMatrix[srcIndx][destIndx]
+                    curCost = curCost + distancesMatrix[srcIndx][destIndx]
+                    
+                curCost = curCost + distFrmStart[subset[0]]
+                curCost = curCost + distToEnd[subset[interLocsLen-1]]                
+                print "\n Path and Cost are = ", subset, curCost
+                if curCost < minCost:
+                    print "\n found minimum cost adding", subset, len(paths)
+                    minCost =  curCost
+                    paths.append(subset)
+    print "\n\n Minimum cost is ", minCost
+    bestPth = paths[len(paths)-1]
+    print "\n Best path is ", bestPth
+    for i in range(0,interLocsLen):
+        optimized_route.append(locations_list[bestPth[i]])
+    print "\n Best final path is ", optimized_route
+    
+    
 @app.route('/result',methods = ['POST'])
 def getPrice():
     """
@@ -417,7 +494,7 @@ def getPrice():
         intermediate_address_lat_lng = get_details(original_list) # get the latitude and longitude of the intermediate locations
         #print(intermediate_address_lat_lng)
         #get_optimum_route(intermediate_address_lat_lng, startlocation, endlocation) # get the optimized route using google api
-        get_best_route(intermediate_address_lat_lng, start_point, end_point)
+        get_best_routeDj(intermediate_address_lat_lng, start_point, end_point)
         print "\n\n optimized_route = ", optimized_route
         
     lyft_data = get_Lyft_details() # get the cost, duration and distance for entire trip with lyft
