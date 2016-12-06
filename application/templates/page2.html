@@ -160,36 +160,27 @@ button:hover {background-color: green; color: white;}
 
 </style>
 </head>
-<body>
+<body style="background-color:black;">
 <div class="container">
 	<div class ="wrapper">
 		<div class="content">
-			<div class="content-left" style="width: 50%; float: left; display: inline-block;">
+			<div class="content-left" style="width: 50%; float: centre; display: inline-block;">
 			
-			<h1 style="margin-top: 20px; margin-bottom: 20px; text-align: center;">Get your current location</h1>
-			<p style="text-align: center; font-size:20px;">Click on the button to find nearby Parking Lots</p>				
+			<h1 style="margin-top: 20px; margin-bottom: 20px; text-align: center; color: white">Get your current location</h1>
+							
 		<button onclick="getLocation()" class="getlocation1" style="margin-top: 10px; padding:5px; margin-bottom: 20px; text-align: center;">Click Here</button>
 		
 		
-			<div id="map_canvas" style="width:500px; height:500px; text-align: center; margin: 0px;"></div>
+
+			
+		</div>
+
+	</div>
+<div id="map_canvas" style="width:500px; height:500px; text-align: center; margin-left: 420px; margin-top: 30px "></div>
 			</div>
 
-			<div class="content-right" style="width: 50%; float: right; display: inline-block;">
-			<h1 style="font-size: 28px;">Select your Parking lot from the dropdown</h1>
-			<div class="dropdown">
-    			<button class="btn btn-primary dropdown-toggle" style="font-size: 18px;" type="button" data-toggle="dropdown">Plot Your Spot
-    			<span class="caret"></span></button>
-   		 		<ul class="dropdown-menu">
-      				<li><a href="parkingplotsmain.html">North Garage</a></li>
-      				<li><a href="parkingplotsmain.html">East Garage</a></li>
-      				<li><a href="parkingplotsmain.html">South Garage</a></li>
-      				<li><a href="parkingplotsmain.html">West Garage</a></li>
-    			</ul>
- 	 		</div>
-			</div>
-		</div>
-	</div>
 </div>
+<button onclick="document.location.href = 'index.html'" style="padding:5px; margin-top: 10px; text-align: center;">Go Back</button>
 </body>
 </html>
 
