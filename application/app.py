@@ -688,8 +688,9 @@ def post_trip():
         adrs = geo_location.address + geo_location.city + geo_location.state + geo_location.zip
         original_locs.append({"address" : adrs, "lat": lat, "lng" : lng, "location_id" : interLoc})
         
-    get_optimum_route(original_locs, startlocation, endlocation) # get the optimized route using google api
-          
+    #get_optimum_route(original_locs, startlocation, endlocation) # get the optimized route using google api
+    get_best_routeDj(original_locs, startlocation, endlocation)
+    
     optimal_locs = []
     for interLoc in optimized_route:
         locan = interLoc["address"].replace(" ","+")
