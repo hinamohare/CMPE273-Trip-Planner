@@ -20,7 +20,7 @@ app = Flask(__name__) #define app using Flask
 
 
 #************************************  database config information    ********************************#
-app.config['SQLALCHEMY_DATABASE_URI']  = 'mysql+pymysql://root:root@127.0.0.1:3306/address'
+app.config['SQLALCHEMY_DATABASE_URI']  = 'mysql+pymysql://hina:hina@127.0.0.1:3306/address'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
@@ -89,10 +89,13 @@ def get_lat_lng(req_url):
     :return:  {"lat": lat, "lng": lng} Dictionary containing latitude and longitude of the location
     """
     result = {} # stores the latitude and longitude
+    print "url : "
+    print req_url
     response = urllib2.urlopen(req_url) # call the google api using url provided
     json_response = response.read()
     jsonList = json.loads(json_response)
 
+    print(jsonList)
     # extract the latitude and longitude from the response
     lat = jsonList["results"][0]["geometry"]["location"]["lat"]
     lng = jsonList["results"][0]["geometry"]["location"]["lng"]
@@ -101,8 +104,69 @@ def get_lat_lng(req_url):
     return result
 
 
+# ****************************************Get location from db function*********************************************#
+def get_location_db(location, name):
+    """
+    Search the location in db. If found return. else get its lat and long from google and store in db.
+    :param location: actual location
+    :name :name of the location
+    :return: the geological information of the location
+    """
+    ap = AddressParser()
+    loc_address = ap.parse_address(location)
+    street = ""
+    if loc_address.house_number is not None:
+        street += loc_address.house_number
+    if loc_address.street_prefix is not None:
+        street += loc_address.street_prefix
+    if loc_address.street is not None:
+        street += loc_address.street
+    if loc_address.street_suffix is not None:
+        street += loc_address.street_suffix
 
-def get_details(List):
+    loc_city = ""
+    if loc_address.city is not None:
+        loc_city = loc_address.city
+    loc_state = ""
+    if loc_address.state is not None:
+        loc_state = loc_address.state
+    loc_zip = ""
+    if loc_address.zip is not None:
+        loc_zip = loc_address.zip
+
+    if LocationDetails.query.filter(LocationDetails.address == street, LocationDetails.city == loc_city,
+                                    LocationDetails.state == loc_state, LocationDetails.zip == loc_zip).count() > 0:
+        # print "\n\n\n Address found", location
+        record = LocationDetails.query.filter(LocationDetails.address == street, LocationDetails.city == loc_city,
+                                              LocationDetails.state == loc_state,
+                                              LocationDetails.zip == loc_zip).first_or_404()
+        return record
+
+    # print "\n\n\n Address NOT found", location
+
+    # get the geolocation of the address
+    print location
+    req_address = location.replace(" ", "+")
+    print req_address
+    req_url = "http://maps.google.com/maps/api/geocode/json?address=" + req_address + "&sensor=false"
+    geo_location = get_lat_lng(req_url)
+    lat = geo_location["lat"]
+    lng = geo_location["lng"]
+    createdOn = datetime.now()
+    updatedOn = datetime.now()
+
+    # insert the address details into the database
+    record = LocationDetails(name, street, loc_city, loc_state, loc_zip, createdOn, updatedOn, lat, lng)
+    db.session.add(record)
+    db.session.commit()
+
+    record = LocationDetails.query.filter(LocationDetails.address == street, LocationDetails.city == loc_city,
+                                          LocationDetails.state == loc_state,
+                                          LocationDetails.zip == loc_zip).first_or_404()
+    return record
+
+
+def get_lat_lng_intermediateLocations(List):
     """
      get the latitude and longitude of the intermedate locations without optimum routes
     :param List: List of intermediate locations of the travel
@@ -491,7 +555,7 @@ def getPrice():
     no_inter_points = len(original_list)
     #print "\n\n no_inter_points = ", no_inter_points
     if no_inter_points>0 :
-        intermediate_address_lat_lng = get_details(original_list) # get the latitude and longitude of the intermediate locations
+        intermediate_address_lat_lng = get_lat_lng_intermediateLocations(original_list) # get the latitude and longitude of the intermediate locations
         #print(intermediate_address_lat_lng)
         #get_optimum_route(intermediate_address_lat_lng, startlocation, endlocation) # get the optimized route using google api
         get_best_routeDj(intermediate_address_lat_lng, start_point, end_point)
@@ -536,57 +600,6 @@ def getPrice():
     print "\n\n\n final answer : ",json_result
     return json_result
 
-# ****************************************Get location from db function*********************************************#
-def get_location_db(location, name):
-    """
-    Search the location in db. If found return. else get its lat and long from google and store in db.
-    :param location: actual location
-    :name :name of the location
-    :return: the geological information of the location
-    """
-    ap = AddressParser()
-    loc_address = ap.parse_address(location)
-    street = ""
-    if loc_address.house_number is not None:
-                    street += loc_address.house_number
-    if loc_address.street_prefix is not None:
-                    street += loc_address.street_prefix
-    if loc_address.street is not None:
-                    street += loc_address.street
-    if loc_address.street_suffix is not None:
-                    street += loc_address.street_suffix
-                    
-    loc_city = ""
-    if loc_address.city is not None:
-                    loc_city = loc_address.city   
-    loc_state = ""
-    if loc_address.state is not None:
-                    loc_state = loc_address.state
-    loc_zip = ""
-    if loc_address.zip is not None:
-                    loc_zip = loc_address.zip
-                    
-    if LocationDetails.query.filter(LocationDetails.address==street,LocationDetails.city==loc_city,LocationDetails.state==loc_state,LocationDetails.zip==loc_zip).count() > 0:
-        #print "\n\n\n Address found", location
-        record = LocationDetails.query.filter(LocationDetails.address==street,LocationDetails.city==loc_city,LocationDetails.state==loc_state,LocationDetails.zip==loc_zip).first_or_404()
-        return record
-    
-    #print "\n\n\n Address NOT found", location
-        
-    # get the geolocation of the address
-    geo_location = get_lat_lng("http://maps.google.com/maps/api/geocode/json?address="+location+"&sensor=false")
-    lat = geo_location["lat"]
-    lng = geo_location["lng"]
-    createdOn = datetime.now()
-    updatedOn = datetime.now()
-    
-    #insert the address details into the database
-    record = LocationDetails(name,street,loc_city,loc_state,loc_zip,createdOn, updatedOn, lat, lng)
-    db.session.add(record)
-    db.session.commit()
-    
-    record = LocationDetails.query.filter(LocationDetails.address==street,LocationDetails.city==loc_city,LocationDetails.state==loc_state,LocationDetails.zip==loc_zip).first_or_404()
-    return record
 
 # ****************************************CRUST API*********************************************#
 # ***************************************    GET ***********************************************#
@@ -689,7 +702,7 @@ def post_trip():
         original_locs.append({"address" : adrs, "lat": lat, "lng" : lng, "location_id" : interLoc})
         
     #get_optimum_route(original_locs, startlocation, endlocation) # get the optimized route using google api
-    get_best_routeDj(original_locs, startlocation, endlocation)
+    get_best_routeDj(original_locs, startLoc, endLoc)
     
     optimal_locs = []
     for interLoc in optimized_route:
