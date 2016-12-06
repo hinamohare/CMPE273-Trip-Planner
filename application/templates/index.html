@@ -46,6 +46,8 @@
 
     }
 </script>
+
+
 <title> TRIP PLANNER </title>
 <style>
 h1 {
@@ -54,7 +56,7 @@ h1 {
 } 
 </style>
 </head>
-<body background="{{ url_for('static', filename='img2.jpg') }}">
+<body background="C:\Users\natas\OneDrive\Documents\273_uber\CMPE273-Trip-Planner\application\templates\img2.jpg">
 <h1 height=20px><center>TRIP PLANNER</h1>
 <form   id="frmAddress">
 	<b>Starting point : </b><input id="start" name ="start" type="text" size="50" placeholder="Enter location" autocomplete="off"><br><br>
@@ -66,7 +68,11 @@ h1 {
 	<br><br>
 	<input id="submit" type="button" name="submit" value="Get The Fair">
 </form>
-
+<input type="button" onclick="document.location.href = 'page2.html'" style="margin-top: 10px; padding:5px; margin-bottom: 20px; text-align: center;" value="Get Location"></button>
+		
+		
+			<div id="map_canvas" style="width:500px; height:500px; text-align: center; margin: 0px;"></div>
+			</div>
 <div id="result"></div>
  
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
