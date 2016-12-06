@@ -506,11 +506,15 @@ def getPrice():
     best_route = []
     if no_inter_points>0 :
         for L in optimized_route:
-            best_route.append(L["address"])
+            midPoint = {}
+            midPoint["lat"] = L["lat"]
+            midPoint["lng"] = L["lng"]
+            midPoint["address"]= L["address"]
+            best_route.append(midPoint)
 
     # construct the final response
-    final_result["start"] = start_point["address"]
-    final_result["end"] = end_point["address"]
+    final_result["start"] = start_point
+    final_result["end"] = end_point
     final_result["best_route_by_costs"]= best_route
     final_result["providers"] = providers
 
