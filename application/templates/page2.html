@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html, user-scalable=no;">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<script type="text/javascript"
+    src="http://maps.google.com/maps/api/js?sensor=false">
+</script>
+<script type="text/javascript">
+  
+    
+	
+
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    } 
+
+
+function showPosition(position) {
+    lat = position.coords.latitude;
+    lon = position.coords.longitude;
+    latlon = new google.maps.LatLng(lat, lon)
+    mapholder = document.getElementById('map_canvas')
+    mapholder.style.height = '250px';
+    mapholder.style.width = '500px';
+
+    var myOptions = {
+    center:latlon,zoom:15,
+    mapTypeId:google.maps.MapTypeId.ROADMAP,
+    mapTypeControl:false,
+    navigationControlOptions:{style:google.maps.NavigationControlStyle.SMALL}
+    }
+    
+    var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+    var marker = new google.maps.Marker({position:latlon,map:map,title:"You are here!"});
+	 
+	
+	
+	setMarkers(map);
+	
+}
+
+   
+}
+var beaches = [
+        ['north garage', 37.3362, -121.8811, 4],
+        ['east garage', 37.3392, -121.8822, 5],
+        ['south garage', 37.3352, -121.8833, 3],
+        ['west garage', 37.3312, -121.8844, 2],
+        ['university garage', 37.3322, -121.8855, 1]
+      ];
+
+      function setMarkers(map) {
+        // Adds markers to the map.
+
+        // Marker sizes are expressed as a Size of X,Y where the origin of the image
+        // (0,0) is located in the top left of the image.
+
+        // Origins, anchor positions and coordinates of the marker increase in the X
+        // direction to the right and in the Y direction down.
+        var image = {
+          url: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+          // This marker is 20 pixels wide by 32 pixels high.
+          size: new google.maps.Size(20, 32),
+          // The origin for this image is (0, 0).
+          origin: new google.maps.Point(0, 0),
+          // The anchor for this image is the base of the flagpole at (0, 32).
+          anchor: new google.maps.Point(0, 32)
+        };
+        // Shapes define the clickable region of the icon. The type defines an HTML
+        // <area> element 'poly' which traces out a polygon as a series of X,Y points.
+        // The final coordinate closes the poly by connecting to the first coordinate.
+        
+		var shape = {
+          coords: [1, 1, 1, 20, 18, 20, 18, 1],
+          type: 'poly',
+        };
+
+		
+		
+
+        for (var i = 0; i < beaches.length; i++) {
+          var beach = beaches[i];
+          var marker = new google.maps.Marker({
+            position: {lat: beach[1], lng: beach[2]},
+            map: map,
+            icon: image,
+            shape: shape,
+            title: beach[0],
+            zIndex: beach[3]
+          });
+			google.maps.event.addListener(marker, 'click', function() {
+        window.open("parkingplotsmain.html");
+     });
+        }
+		
+}
+ 
+</script>  
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<title>207 Project</title>
+<style>
+.container {width: 100%;}
+.wrapper
+{width: 100%;
+margin: 0 auto;}
+.content {width: 100%; margin: 0 auto; text-align: center;}
+h2 {
+	
+	color: #000000;
+	margin-bottom: 20px;
+}
+
+.dropbtn {
+    background-color: #000000;
+    color: white;
+    padding: 16px 24px;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 14px;
+    text-decoration: none;
+    display: block;
+
+}
+
+.dropdown-content a:hover {background-color: rgb(128,128,128);}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+    
+}
+
+.dropdown:hover {
+    background-color: #808080;
+}
+button {color:black; background-color:grey; }
+button:hover {background-color: green; color: white;}
+
+</style>
+</head>
+<body>
+<div class="container">
+	<div class ="wrapper">
+		<div class="content">
+			<div class="content-left" style="width: 50%; float: left; display: inline-block;">
+			
+			<h1 style="margin-top: 20px; margin-bottom: 20px; text-align: center;">Get your current location</h1>
+			<p style="text-align: center; font-size:20px;">Click on the button to find nearby Parking Lots</p>				
+		<button onclick="getLocation()" class="getlocation1" style="margin-top: 10px; padding:5px; margin-bottom: 20px; text-align: center;">Click Here</button>
+		
+		
+			<div id="map_canvas" style="width:500px; height:500px; text-align: center; margin: 0px;"></div>
+			</div>
+
+			<div class="content-right" style="width: 50%; float: right; display: inline-block;">
+			<h1 style="font-size: 28px;">Select your Parking lot from the dropdown</h1>
+			<div class="dropdown">
+    			<button class="btn btn-primary dropdown-toggle" style="font-size: 18px;" type="button" data-toggle="dropdown">Plot Your Spot
+    			<span class="caret"></span></button>
+   		 		<ul class="dropdown-menu">
+      				<li><a href="parkingplotsmain.html">North Garage</a></li>
+      				<li><a href="parkingplotsmain.html">East Garage</a></li>
+      				<li><a href="parkingplotsmain.html">South Garage</a></li>
+      				<li><a href="parkingplotsmain.html">West Garage</a></li>
+    			</ul>
+ 	 		</div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
+
+
+
+
+
