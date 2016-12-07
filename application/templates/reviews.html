@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Theme Made By www.w3schools.com - No Copyright -->
+  <title>Bootstrap Theme Company Page</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <style>
+  /****** Rating Starts *****/
+            @import url(http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
+
+            fieldset, label { margin: 0; padding: 0; }
+            body{ margin: 20px; }
+            h1 { font-size: 1.5em; margin: 10px; }
+
+            .rating { 
+                border: none;
+                float: left;
+            }
+
+            .rating > input { display: none; } 
+            .rating > label:before { 
+                margin: 5px;
+                font-size: 1.25em;
+                font-family: FontAwesome;
+                display: inline-block;
+                content: "\f005";
+            }
+
+            .rating > .half:before { 
+                content: "\f089";
+                position: absolute;
+            }
+
+            .rating > label { 
+                color: #ddd; 
+                float: right; 
+            }
+
+            .rating > input:checked ~ label, 
+            .rating:not(:checked) > label:hover,  
+            .rating:not(:checked) > label:hover ~ label { color: #FFD700;  }
+
+            .rating > input:checked + label:hover, 
+            .rating > input:checked ~ label:hover,
+            .rating > label:hover ~ input:checked ~ label, 
+            .rating > input:checked ~ label:hover ~ label { color: #FFED85;  }     
+       
+   
+  body {
+      font: 400 15px Lato, sans-serif;
+      line-height: 1.8;
+      color: #818181;
+  }
+  h2 {
+      font-size: 24px;
+      text-transform: uppercase;
+      color: #303030;
+      font-weight: 600;
+      margin-bottom: 30px;
+  }
+  h4 {
+      font-size: 19px;
+      line-height: 1.375em;
+      color: #303030;
+      font-weight: 400;
+      margin-bottom: 30px;
+  }  
+ 
+  .container-fluid {
+      padding: 60px 50px;
+  }
+  .bg-grey {
+      background-color: #f6f6f6;
+  }
+  
+  
+  </style>
+</head>
+<body id="myPage" data-spy="scroll" data-target=".navbar" data-offset="60">
+
+                    <script>
+                        $(document).ready(function () {
+                            $("#demo3 .stars").click(function () {
+
+                                var label = $("label[for='" + $(this).attr('id') + "']");
+                                
+                                $("#feedback").text(label.attr('title'));
+                                $(this).attr("checked");
+                            });
+                        });
+                    </script>
+
+
+<!-- Rating Section -->
+<div id="contact" class="container-fluid bg-grey">
+  <h2 class="text-center">HOW WAS YOUR TRIP?</h2>
+  <div class="row">
+    
+    <div class="col-sm-5">
+        <h4>Please rate your trip and leave a review for our Trip Planner</h4>
+        <p><span class="glyphicon glyphicon-map-marker"></span> San Jose, CA</p>
+        <p><span class="glyphicon glyphicon-phone"></span> +00 1515151515</p>
+        <p><span class="glyphicon glyphicon-envelope"></span> myemail@tripplanner.com</p>
+    </div>
+    
+    <div class="col-sm-7">
+        <div class="row">
+          <div class="col-sm-3 form-group">
+            <fieldset id='demo3' class="rating">
+                          <input class="stars" type="radio" id="star53" name="rating" value="5" />
+                          <label class = "full" for="star53" title="Awesome - 5 stars"></label>
+
+                          <input class="stars" type="radio" id="star4half3" name="rating" value="4.5" />
+                          <label class="half" for="star4half3" title="Pretty good - 4.5 stars"></label>
+                          
+                          <input class="stars" type="radio" id="star43" name="rating" value="4" />
+                          <label class = "full" for="star43" title="Pretty good - 4 stars"></label>
+                          
+                          <input class="stars" type="radio" id="star3half3" name="rating" value="3.5" />
+                          <label class="half" for="star3half3" title="Meh - 3.5 stars"></label>
+                          
+                          <input class="stars" type="radio" id="star33" name="rating" value="3" />
+                          <label class = "full" for="star33" title="Meh - 3 stars"></label>
+                          
+                          <input class="stars" type="radio" id="star2half3" name="rating" value="2.5" />
+                          <label class="half" for="star2half3" title="Kinda bad - 2.5 stars"></label>
+                          
+                          <input class="stars" type="radio" id="star23" name="rating" value="2" />
+                          <label class = "full" for="star23" title="Kinda bad - 2 stars"></label>
+                          
+                          <input class="stars" type="radio" id="star1half3" name="rating" value="1.5" />
+                          <label class="half" for="star1half3" title="Meh - 1.5 stars"></label>
+                          
+                          <input class="stars" type="radio" id="star13" name="rating" value="1" />
+                          <label class = "full" for="star13" title="Sucks big time - 1 star"></label>
+                          
+                          <input class="stars" type="radio" id="starhalf3" name="rating" value="0.5" />
+                          <label class="half" for="starhalf3" title="Sucks big time - 0.5 stars"></label>
+                      </fieldset> 
+          </div>          
+        </div>
+        <div class="row">
+          <div class="col-sm-3 form-group" id="feedback">
+            <input class="form-control" id="rating" name="rating" placeholder="Rating" type="text">
+          </div>
+        </div>
+        <div class="row">
+          <textarea class="form-control" id="review" name="review" placeholder="Review" rows="5"></textarea><br>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 form-group">
+            <button class="btn btn-default pull-right" type="submit">Submit</button>
+          </div>
+        </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="googleMap" style="height:400px;width:100%;"></div>
+
+<!-- Add Google Maps -->
+<script src="https://maps.googleapis.com/maps/api/js"></script>
+<script>
+var myCenter = new google.maps.LatLng(37.3352, -121.8811);
+
+function initialize() {
+var mapProp = {
+  center:myCenter,
+  zoom:12,
+  scrollwheel:false,
+  draggable:false,
+  mapTypeId:google.maps.MapTypeId.ROADMAP
+  };
+
+var map = new google.maps.Map(document.getElementById("googleMap"),mapProp);
+
+var marker = new google.maps.Marker({
+  position:myCenter,
+  });
+
+marker.setMap(map);
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+
+<script>
+
+</script>
+
+</body>
+</html>
