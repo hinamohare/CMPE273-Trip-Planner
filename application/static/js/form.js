@@ -19,8 +19,7 @@ $(document).ready(function(){
             return false;
         }
 			var inputdata = getpayloaddata();
-			
-			console.log(inputdata);
+
             $.ajax({
                 url: '/result', // url where to submit the request
                 type : "post", // type of action post || get
@@ -29,15 +28,13 @@ $(document).ready(function(){
                 data : inputdata, // post data || get data
 
                 beforeSend:function(){
-                    //alert('before');
+
                     $("#modal").parent().find(".ui-dialog-titlebar").hide();
                     dialog.dialog( "open" );},
-                    //$('#modal').addClass("loading");
-                    //$('#modal').show();
+
                 success : function(result) {
-                    // you can see the result from the console
-                    // tab of the developer tools
-                    //console.log(result);
+
+
 					showoutput(result);
                 },
                 error: function(xhr, resp, text) {
@@ -46,8 +43,7 @@ $(document).ready(function(){
                 complete:function()
                 {
                     dialog.dialog( "close" );
-                    //$('#modal').removeClass("loading");
-                    // $('#modal').hide();
+
                 }
             })
         });
@@ -71,7 +67,7 @@ $(document).ready(function(){
               counter++;
 		 }
              $('.remloc').on('click', function(){
-            //alert('text');
+
             var self = this;
             $(self).parent().parent('tr').remove();
             });
@@ -91,8 +87,8 @@ $(document).ready(function(){
             }
         }
 		var bestroutedata =objOutput.best_route_by_costs;
-		//$($('.startaddress')[0]).text(startdata.address);
-		//$($('.endaddress')[0]).text(enddata.address);
+
+		
 		var itemhtml ='';
            itemhtml += '<li  class="startaddress">'+startdata.address+'  ↓  </li>';
         if(bestroutedata && bestroutedata.length >0)
