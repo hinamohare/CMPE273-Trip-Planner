@@ -5,6 +5,7 @@
 <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script type=text/javascript src = "{{ url_for('static', filename = 'js/form.js') }}"></script>
+
 <script>
 
 	function initialize()
@@ -45,6 +46,34 @@
          }
 
     }
+<!--function foo() {-->
+<!--var array_data;-->
+
+<!--$.ajax({-->
+    <!--type: "GET",-->
+    <!--url: "/",-->
+    <!--dataType: "json"-->
+<!--});-->
+
+<!--request.done(function(JSON_array) {-->
+	<!--alert(JSON_array)-->
+    <!--/*JSON_array is already parsed and it is an object..*/-->
+
+    <!--array_data = JSON.parse(JSON_array)["array"]-->
+    <!--/* ^ I belive you dont have to do this ^*/-->
+
+    <!--console.log(array_data);-->
+    <!--/* ^ change this to console.log(JSON_array);*/-->
+<!--});-->
+
+<!--return array_data;-->
+<!--/* ^ change this to return JSON_array;*/-->
+<!--};-->
+
+function goTo(){
+
+}
+
 </script>
 
 
@@ -53,7 +82,14 @@
 h1 {
     color: black;
       font-size: 4em;
-} 
+}
+tr, td {
+    border: 1px solid;
+}
+td {
+        padding: 15px;
+
+}
 </style>
 </head>
 <body background="C:\Users\natas\OneDrive\Documents\273_uber\CMPE273-Trip-Planner\application\templates\img2.jpg">
@@ -68,15 +104,17 @@ h1 {
 	<br><br>
 	<input id="submit" type="button" name="submit" value="Get The Fair">
 </form>
-<input type="button" onclick="document.location.href = 'page2.html'" style="margin-top: 10px; padding:5px; margin-bottom: 20px; text-align: center;" value="Get Location"></button>
-		
-		
-			<div id="map_canvas" style="width:500px; height:500px; text-align: center; margin: 0px;"></div>
-			</div>
-<div id="result"></div>
+<input type="button" onclick="document.location='C:/Users/natas/OneDrive/Documents/273_uber/CMPE273-Trip-Planner/application/templates/test1.html'" style="margin-top: 10px; padding:5px; margin-bottom: 20px; text-align: center;" value="Check directions"></button>
+
+
+			<!-- <div id="map_canvas" style="width:500px; height:500px; text-align: center; margin: 0px;"></div>
+			</div> -->
+
  
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
- 
+<div id ="heading"><h3>Trip: </div>
+ <div id = "results"><h3>Available options:
+ </div>
  
 </body>
 
