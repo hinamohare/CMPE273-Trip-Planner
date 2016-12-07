@@ -118,7 +118,7 @@ width:830px;
 <body>
 <div id='container' class='aligncenter' >
 <div class='mainheader '>
-<img  src="../static/images/logo.png" alt="Travel Planner">
+<img  src="{{ url_for('static', filename = 'images/logo.png') }}" alt="Travel Planner">
 
 </div>
 
@@ -127,9 +127,9 @@ width:830px;
 <form   id="frmAddress">
 
 	<table id='tblAddress' cellspacing='15'>
-	<tr ><td>Starting Point</td><td><input id="start" required value='Foster City, CA, United States' class='ui-autocomplete-input' name ="start" type="text" size="50" placeholder="Choose starting point..." autocomplete="off">
+	<tr ><td>Starting Point</td><td><input id="start" required  class='ui-autocomplete-input' name ="start" type="text" size="50" placeholder="Choose starting point..." autocomplete="off">
 	</td></tr>
-	<tr><td>Destination</td><td><input id="end" required value='San Jose, CA, United States' class='ui-autocomplete-input' name = "end" type="text" size="50" placeholder="Choose destination..." autocomplete="off">
+	<tr><td>Destination</td><td><input id="end" required  class='ui-autocomplete-input' name = "end" type="text" size="50" placeholder="Choose destination..." autocomplete="off">
 	</td></tr>
 	
 	</table>
@@ -149,7 +149,7 @@ width:830px;
 <div id='uberdata' class='resulthead ui-widget'>
 
 <div style="line-height:0px;vertical-align: top;height:50px;padding-top:0px;">
-<img align='left'  width='90px' height='70px' src="../static/images/Uber_Logotype_Digital_black.png"  alt="lyft"/>
+<img align='left'  width='90px' height='70px' src= "{{ url_for('static', filename = 'images/Uber_Logotype_Digital_black.png') }}"  alt="Uber"/>
 </div>
 
 <div class='provider-content'>
@@ -159,7 +159,7 @@ width:830px;
 		<td><span class="price">0 $</span></td>
 		<td><span class="time">0 min</span>		</td>
 		<td><span class="distance">0 mile</span></td>
-		<td><span class="ridetype">NA</span></td>
+		<td><span class="ridetype">  -</span></td>
 
 	</tr>
 </table>
@@ -169,7 +169,7 @@ width:830px;
 <div id='lyftdata' class='resulthead ui-widget'>
 
 <div class='lyftlogo' style="line-height:0px;vertical-align: top;height:50px">
-<img align='left' style='padding-left:14px;'  width='50px' height='35px' src="../static/images/lyft_logo_tiny_pink.png"  alt="lyft"/>
+<img align='left' style='padding-left:14px;'  width='50px' height='35px' src="{{ url_for('static', filename = 'images/lyft_logo_tiny_pink.png') }}"  alt="lyft"/>
 
 </div>
 <div  class='provider-content'>
@@ -179,7 +179,7 @@ width:830px;
 		<td><span class="price">0 $</span></td>
 		<td><span class="time">0 min</span>		</td>
 		<td><span class="distance">0 mile</span></td>
-		<td><span class="ridetype">NA</span></td>
+		<td><span class="ridetype">  -</span></td>
 
 	</tr>
 </table>
@@ -189,7 +189,7 @@ width:830px;
 <div id='routedata' class='resulthead ui-widget'>
 
 <div class='' style="line-height:0px;vertical-align: top;">
-<span class="header font" style='padding-left:14px'>Below are suggested route</span>
+<span class="header font" style='padding-left:14px; color:#36003d'>Below are suggested route</span>
 
 </div>
 <div  class='provider-content'>
