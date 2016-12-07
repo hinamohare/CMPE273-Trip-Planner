@@ -448,9 +448,8 @@ def get_best_routeDj(locations_list,origin_address, destination_address):
     for i in range(0,interLocsLen):
         optimized_route.append(locations_list[bestPth[i]])
     print "\n Best final path is ", optimized_route
-    
-    
-@app.route('/result',methods = ['POST'])
+
+@app.route('/result',methods = ['POST'])    
 def getPrice():
     """
     returns the optimum route solution for the input locations based on cost provided by Lyft and Uber
@@ -729,6 +728,183 @@ def post_review():
 def get_best_reviews():
     record = TripReviews.query.filter_by(rating=5)
     return jsonify(json_list=[i.serialize for i in record.all()])
+
+#************************************Combination Route**************************************#
+@app.route('/waiting')
+def waiting():
+    """
+    returns the index page which consists a form for locations input
+    :return: index page
+    """
+    return render_template('combinationUI.html')
+    
+@app.route('/combinationPrice',methods = ['POST'])
+def getCombinationPrice():
+    """
+    returns the optimum route solution for the input locations based on cost provided by Lyft and Uber
+    :return: json_result
+    """
+    print "\n\n getCombinationPrice started"
+    print "\n request : ", request
+    print "\n request start : ", request.form['start']
+    print "\n request end : ", request.form['end']
+    global start_point
+    global end_point
+    global no_inter_points
+
+    startlocation = request.form['start'] # starting point of the travel
+    location = startlocation.replace(" ","+")
+    adrs = get_location_db(location, "start")
+    print "\n\n\n Start point :  ", adrs.lat, adrs.lng
+    start_point["lat"] = adrs.lat
+    start_point["lng"] = adrs.lng
+    start_point["address"]= startlocation
+    
+    endlocation = request.form['end'] # end point of the travel
+    location = endlocation.replace(" ", "+")
+    result = get_location_db(location, "end")
+    end_point["address"] = endlocation
+    end_point["lat"] = result.lat
+    end_point["lng"] = result.lng
+    print "\n End point : ", end_point
+    
+   
+    original_list = request.json["intermidiatelocation"] # list containing the intermediate locations
+    print "intermidiatelocation \n", original_list
+
+    no_inter_points = len(original_list)
+    print "\n\n no_inter_points = ", no_inter_points
+    if no_inter_points>0 :
+        intermediate_address_lat_lng = get_details(original_list) # get the latitude and longitude of the intermediate locations
+        bestRt = get_best_price(intermediate_address_lat_lng, start_point, end_point)
+        print "\n\n optimized_route2 = ", bestRt
+        for i in bestRt:
+            i["end"].pop('location_id', None)
+            i["start"].pop('location_id', None)
+        json_result = json.dumps(bestRt)
+        print "\n\n\n final answer : ",json_result
+        return json_result
+    emptyLocs = []
+    bestRt = get_best_price(emptyLocs, start_point, end_point)
+    print "\n\n optimized_route1 = ", bestRt
+    bestRt[0]["end"].pop('location_id', None)
+    bestRt[0]["start"].pop('location_id', None)
+    json_result = json.dumps(bestRt)
+    print "\n\n\n final answer1 : ",json_result
+    print "\n\n getCombinationPrice ended"
+    return json_result
+
+def get_price_2dest(start_point, end_point):
+    print "\n get_price_2dest 1"
+    lat1 = start_point["lat"]
+    lng1 = start_point["lng"]
+    lat2 = end_point["lat"]
+    lng2 = end_point["lng"]
+    lyft_data = LyftApi.getLyftCost(lat1,lng1,lat2,lng2)
+    uber_data = UberApi.getUberCost(lat1,lng1,lat2,lng2)
+    if lyft_data["costs_by_cheapest_car_type"] < uber_data["costs_by_cheapest_car_type"]:
+        part = {"start": start_point,
+                "end": end_point,
+                "service_provider": "Lyft",
+                "car_type": lyft_data["car_type"] ,
+                "costs_by_cheapest_car_type": lyft_data["costs_by_cheapest_car_type"],
+                "duration": lyft_data["duration"],
+                  "distance": lyft_data["distance"]}
+    else:
+        part = {"start": start_point,
+                "end": end_point,
+                "service_provider": "Uber",
+                "car_type": uber_data["car_type"] ,
+                "costs_by_cheapest_car_type": uber_data["costs_by_cheapest_car_type"],
+                "duration": uber_data["duration"],
+                  "distance": uber_data["distance"]}
+    return part
+
+
+def get_best_price(locations_list,origin_address, destination_address):
+    print "\n\n\n get_best_price 1"
+    optimized_price_route = []
+    interLocsLen = len(locations_list)
+    if interLocsLen == 0:
+        print "\n get_best_price : No intermediate"
+        part1 = get_price_2dest(origin_address, destination_address)
+        optimized_price_route.append(part1)
+        return optimized_price_route
+    if interLocsLen == 1:
+        print "\n get_best_price : Only 1 intermediate"
+        part1 = get_price_2dest(origin_address, locations_list[0])
+        part2 = get_price_2dest(locations_list[0], destination_address)
+        optimized_price_route.append(part1)
+        optimized_price_route.append(part2)
+        return optimized_price_route
+        
+    print "\n\n\n get_best_price 2"
+    
+    priceMatrix =  [[99999 for _ in range(interLocsLen)] for _ in range(interLocsLen)]
+    
+    priceFrmStart = []   
+    indx = 0
+    while indx < interLocsLen:
+        priceFrmStart.append(get_price_2dest(origin_address, locations_list[indx]))
+        indx = indx + 1   
+    print "\n\n\n get_best_price : priceFrmStart : ", priceFrmStart
+    
+    priceToEnd = []
+    indx = 0
+    while indx < interLocsLen:
+        priceToEnd.append(get_price_2dest(locations_list[indx], destination_address))
+        indx = indx + 1
+    print "\n\n\n get_best_price : priceToEnd : ", priceToEnd
+    
+    index1 = 0    
+    index2 = 0
+    while index1 < interLocsLen:
+        while index2 < interLocsLen:
+            #print " intered with ", index1, index2
+            if index1 == index2:
+                priceMatrix[index1][index2] = 99999
+            else:
+                dst = get_price_2dest(locations_list[index1], locations_list[index2])
+                #print "\n Cost1 is ", dst
+                priceMatrix[index1][index2] = dst
+            index2 = index2 + 1
+        index1= index1 + 1
+        index2 = 0
+        
+    paths = []
+    locs = []
+    minCost = 99999
+    for indx in range(0, interLocsLen):
+        locs.append(indx)
+    for L in range(0, interLocsLen+1):
+        for subset in itertools.permutations(locs, L):
+            if len(subset) == interLocsLen:
+                print "\n Full path found : ", subset                
+                curCost = 0
+                curRt = []
+                curRt.append(priceFrmStart[subset[0]])
+                for i in range(0,interLocsLen-1):
+                    srcIndx = subset[i]
+                    destIndx = subset[i+1]
+                    bestPriceRt = priceMatrix[srcIndx][destIndx]
+                    print "\n Cost is ", srcIndx, destIndx, bestPriceRt["costs_by_cheapest_car_type"]
+                    curCost = curCost + bestPriceRt["costs_by_cheapest_car_type"]
+                    curRt.append(bestPriceRt)
+
+                curRt.append(priceToEnd[subset[interLocsLen-1]])
+                bestStartRt = priceFrmStart[subset[0]]
+                bestEndRt = priceToEnd[subset[interLocsLen-1]]                
+                curCost = curCost + bestPriceRt["costs_by_cheapest_car_type"]
+                curCost = curCost + bestEndRt["costs_by_cheapest_car_type"]                
+                print "\n Path and Cost are = ", subset, curCost
+                if curCost < minCost:
+                    print "\n found minimum cost adding", subset, len(paths)
+                    minCost =  curCost
+                    paths.append(curRt)
+    print "\n\n Minimum cost is ", minCost
+    bestPth = paths[len(paths)-1]
+    print "\n Best path is ", bestPth
+    return bestPth    
 
 #************************************run the main program**************************************#
 
