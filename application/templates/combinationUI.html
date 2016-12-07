@@ -1,0 +1,62 @@
+<!Doctype html>
+<html>
+<head>
+
+<script>
+	function initialize()
+	{	
+		var start = document.getElementById('start');
+		var end = document.getElementById('end');
+		
+		var startautoComplete = new google.maps.places.Autocomplete(start);
+		var endautoComplete = new google.maps.places.Autocomplete(end);
+		
+	}
+	
+	google.maps.event.addDomListener(window, 'load', initialize);
+	var counter = 1;
+    var limit = 50;
+    function addInput(divName){
+         if (counter == undefined)
+        {
+            counter = 1;
+        }
+         if (counter == limit)  {
+              alert("1 You have reached the limit of adding " + counter + " Location");
+         }
+         else {
+              var newdiv = document.createElement('div');
+			  var txtId = 'loc' + counter
+              newdiv.innerHTML = "<b>Location " + " :<b> <input type='text' class = 'otherlocation' id = '"+txtId+"' size='50' name='others' placeholder='Enter location' autocomplete='off'><br><Br>";
+              document.getElementById(divName).appendChild(newdiv);
+			  var loc = document.getElementById(txtId);
+			  var locautoComplete = new google.maps.places.Autocomplete(loc);
+              counter++;
+         }
+    }
+</script>
+
+</head>
+<body>
+<a href='/'>Home</a><br>
+<center>
+<br><br><h2><font color="blue">Trip Planner!</font></h2><br><br>
+<p>If your waiting time at intermediate locations is more than 15 minutes, we recommend you to use this service to get the best results!</p>
+<br><br>
+<form   action="/combinationPrice" method="POST">
+	<b>Starting point : </b><input id="start" name ="start" type="text" size="50" placeholder="Enter location" autocomplete="on"><br><br>
+	<b>Intermediate Location 1 : </b><input id="inter1" name = "inter1" type="text" size="50" placeholder="Enter location" autocomplete="on"><br><br>
+    <b>Intermediate Location 2 : </b><input id="inter2" name = "inter2" type="text" size="50" placeholder="Enter location" autocomplete="on"><br><br>
+	<b>Destination : </b><input id="end" name = "end" type="text" size="50" placeholder="Enter location" autocomplete="on"><br><br>
+	
+	<br><br>
+	<input id="submit" type="submit" name="submit" value="Get The Fair">
+</form>
+</center>
+
+<div id="result"></div>
+ 
+
+ 
+</body>
+</html>

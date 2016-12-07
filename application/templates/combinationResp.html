@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table, th, td {
+    border: 1px solid black;
+}
+</style>
+</head>
+<body>
+<h2>Trip Planner!</h2>
+<a href='/'>Home</a>
+<a href='/waiting' style="float: right">Previous page</a><br>
+<h2>The best combination of services for you!</h2>
+{% block body %}
+<table style="width:100%">
+    <th>From </th>
+    <th>To </th>
+    <th>Service </th>
+    <th>Car Type </th>
+    <th>Best Cost </th>
+    <th>Distance </th>
+    <th>Duration </th>
+{% for record in result %}
+   <tr>
+        <td> {{ record["start"]["address"] }} </td>
+        <td> {{ record["end"]["address"] }} </td>
+        <td> {{ record["service_provider"]}} </td>
+        <td> {{ record["car_type"]}} </td>
+        <td> {{ record["costs_by_cheapest_car_type"]}} </td>
+        <td> {{ record["distance"]}} </td>
+        <td> {{ record["duration"]}} </td>
+   </tr>
+{% endfor %}
+</table>
+{% endblock %}
+</body>
+</html>

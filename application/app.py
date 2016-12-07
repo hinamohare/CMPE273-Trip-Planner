@@ -752,6 +752,7 @@ def getCombinationPrice():
     global end_point
     global no_inter_points
 
+    #startlocation = request.json["startlocation"] # starting point of the travel
     startlocation = request.form['start'] # starting point of the travel
     location = startlocation.replace(" ","+")
     adrs = get_location_db(location, "start")
@@ -769,7 +770,10 @@ def getCombinationPrice():
     print "\n End point : ", end_point
     
    
-    original_list = request.json["intermidiatelocation"] # list containing the intermediate locations
+    #original_list = request.json["intermidiatelocation"] # list containing the intermediate locations
+    original_list = []
+    original_list.append(request.form['inter1'])
+    original_list.append(request.form['inter2'])
     print "intermidiatelocation \n", original_list
 
     no_inter_points = len(original_list)
@@ -783,16 +787,19 @@ def getCombinationPrice():
             i["start"].pop('location_id', None)
         json_result = json.dumps(bestRt)
         print "\n\n\n final answer : ",json_result
-        return json_result
-    emptyLocs = []
-    bestRt = get_best_price(emptyLocs, start_point, end_point)
-    print "\n\n optimized_route1 = ", bestRt
-    bestRt[0]["end"].pop('location_id', None)
-    bestRt[0]["start"].pop('location_id', None)
-    json_result = json.dumps(bestRt)
-    print "\n\n\n final answer1 : ",json_result
-    print "\n\n getCombinationPrice ended"
-    return json_result
+        #return json_result
+        return render_template('combinationResp.html', result=bestRt)
+    else:
+        emptyLocs = []
+        bestRt = get_best_price(emptyLocs, start_point, end_point)
+        print "\n\n optimized_route1 = ", bestRt
+        bestRt[0]["end"].pop('location_id', None)
+        bestRt[0]["start"].pop('location_id', None)
+        json_result = json.dumps(bestRt)
+        print "\n\n\n final answer1 : ",json_result
+        print "\n\n getCombinationPrice ended"
+        #return json_result
+        return render_template('combinationResp.html', result=bestRt)
 
 def get_price_2dest(start_point, end_point):
     print "\n get_price_2dest 1"
