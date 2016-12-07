@@ -88,7 +88,7 @@ $(document).ready(function(){
         }
 		var bestroutedata =objOutput.best_route_by_costs;
 
-		
+
 		var itemhtml ='';
            itemhtml += '<li  class="startaddress">'+startdata.address+'  ↓  </li>';
         if(bestroutedata && bestroutedata.length >0)
@@ -124,9 +124,9 @@ $(document).ready(function(){
 
             var pricedata = data.total_costs_by_cheapest_car_type +' '+data.currency_code;
             $($(containerid + ' .price')[0]).text(pricedata);
-             var timedata = data.total_duration +' '+data.duration_unit;
+             var timedata = Math.round(data.total_duration * 100) / 100 +' '+ data.distance_unit;
             $($(containerid +' .time')[0]).text(timedata);
-            var distancedata = data.total_distance +' '+data.distance_unit;
+            var distancedata =  Math.round( data.total_distance* 100) / 100+' '+data.distance_unit;
             $($(containerid +' .distance')[0]).text(distancedata);
 
             $($(containerid + ' .ridetype')[0]).text(data.car_type);
