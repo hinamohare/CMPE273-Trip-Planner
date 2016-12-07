@@ -23,9 +23,10 @@ $(document).ready(function(){
              // var result2 = $("<div/>").attr("id","heading");
               var st="<h3>"+obj.start+"</h3>";
               var en="<h3>"+obj.end+"</h3>";
+              var addLs="<h3>"+obj.best_route_by_costs+"</h3>";
 
                 $("#heading").append(st+en);
-
+                $("#addL").append(addLs);
                 $("#results").append(tbl);
 
                     for(var i=0;i<obj.providers.length;i++)
