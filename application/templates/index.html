@@ -1,12 +1,35 @@
 <!Doctype html>
 <html>
 <head>
+<title>Trip Planner </title>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyAAOiIC-ovRk8X0mwHL6BVd_MN0G8ZJPGo"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--script type=text/javascript src = "{{ url_for('static', filename = 'js/jquery-ui-1.12.1.custom/external/jquery/jquery.js') }}"></script-->
+<script type=text/javascript src = "{{ url_for('static', filename = 'js/jquery-ui-1.12.1.custom/jquery-ui.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='js/jquery-ui-1.12.1.custom/jquery-ui.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='js/jquery-ui-1.12.1.custom/jquery-ui.structure.css') }}" />
+<script type=text/javascript src = "{{ url_for('static', filename = 'js/jquery-ui-1.12.1.custom/external/jquery/jquery.validate.js') }}"></script>
 
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script type=text/javascript src = "{{ url_for('static', filename = 'js/form.js') }}"></script>
 <script>
+/*
+$(document).ready(function(){
 
+
+        var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
+     var myOptions = {
+         zoom: 4,
+         center: myLatlng,
+         mapTypeId: google.maps.MapTypeId.ROADMAP
+         }
+      map = new google.maps.Map($('#map')[0], myOptions);
+      var marker = new google.maps.Marker({
+          position: myLatlng,
+          map: map,
+      title:"Fast marker"
+     });
+     });
+     */
 	function initialize()
 	{	
 		var start = document.getElementById('start');
@@ -23,60 +46,165 @@
 
     var limit = 5;
 
-    function addInput(divName){
-
-         if (counter == limit)  {
-
-              alert("You have reached the limit of adding " + counter + " Location");
-
+function initializemap(){
+     var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
+     var myOptions = {
+         zoom: 4,
+         center: myLatlng,
+         mapTypeId: google.maps.MapTypeId.ROADMAP
          }
+      map = new google.maps.Map(document.getElementById("map"), myOptions);
+      var marker = new google.maps.Marker({
+          position: myLatlng,
+          map: map,
+      title:"Fast marker"
+     });
+}
 
-         else {
+//google.maps.event.addDomListener(window,'load', initializemap);
 
-              var newdiv = document.createElement('div');
-			  var txtId = 'loc' + counter
-              newdiv.innerHTML = "<b>Location " + (counter) + " :<b> <input type='text' class = 'otherlocation' id = '"+txtId+"' size='50' name='others' placeholder='Enter location' autocomplete='off'><br><Br>";
-              document.getElementById(divName).appendChild(newdiv);
-			  var loc = document.getElementById(txtId);
-			  var locautoComplete = new google.maps.places.Autocomplete(loc);
-
-              counter++;
-
-         }
-
-    }
 </script>
-
-
 <title> TRIP PLANNER </title>
 <style>
-h1 {
-    color: black;
-      font-size: 4em;
-} 
+.aligncenter {
+	width: 900px;
+    margin: 0 auto; 
+}
+  .mhsection {
+    width: 800px;
+    
+	margin-top:5px;
+	padding:30px 10px 10px 20px;
+	
+  }
+  .resulthead {
+
+    
+	margin-top:2px;
+	padding:30px 10px 10px 20px;
+	
+  }
+  .resulthead div{
+    padding-top:10px;
+	
+    padding-bottom:10px;
+  }
+  .logobackground
+  {width: 800px;
+  height: 25px;
+  background-image: url(logobg1.jpg);}
+.mainheader {
+	margin-top: 2px;
+	 width: 800px;
+    height: 100px;
+    background: lavender;
+	padding:20px 10px 10px 20px;
+	    border: 1px solid #ddd;
+}
+ .provider-content{
+ .padding-left:14px;
+ }
+ .header {font-size:20px;color:#DFDF;}
+ .maininner{padding-left:0px;}
+
+.ui-dialog-titlebar-close{
+    display: none;
+}
+.resultcontainer{
+width:830px;
+}
 </style>
 </head>
-<body background="C:\Users\natas\OneDrive\Documents\273_uber\CMPE273-Trip-Planner\application\templates\img2.jpg">
-<h1 height=20px><center>TRIP PLANNER</h1>
+<body>
+<div id='container' class='aligncenter' >
+<div class='mainheader '>
+<img  src="../static/images/logo.png" alt="Travel Planner">
+
+</div>
+
+<div class='mhsection ui-corner-all ui-widget  ui-widget-content'>
+<div class='maininner '>
 <form   id="frmAddress">
-	<b>Starting point : </b><input id="start" name ="start" type="text" size="50" placeholder="Enter location" autocomplete="off"><br><br>
-	<b>Destination : </b><input id="end" name = "end" type="text" size="50" placeholder="Enter location" autocomplete="off"><br><br>
-	    
+
+	<table id='tblAddress' cellspacing='15'>
+	<tr ><td>Starting Point</td><td><input id="start" required value='Foster City, CA, United States' class='ui-autocomplete-input' name ="start" type="text" size="50" placeholder="Choose starting point..." autocomplete="off">
+	</td></tr>
+	<tr><td>Destination</td><td><input id="end" required value='San Jose, CA, United States' class='ui-autocomplete-input' name = "end" type="text" size="50" placeholder="Choose destination..." autocomplete="off">
+	</td></tr>
+	
+	</table>
+	
 		<div id="waypoint"></div>
-		<input type="button" value="Add another Location" onClick="addInput('waypoint');">
+		<input type="button" class="ui-button ui-corner-all ui-widget" id='btnAddMoreAddress' value="Add Destination" >
 	
 	<br><br>
-	<input id="submit" type="button" name="submit" value="Get The Fair">
-</form>
-<input type="button" onclick="document.location.href = 'page2.html'" style="margin-top: 10px; padding:5px; margin-bottom: 20px; text-align: center;" value="Get Location"></button>
-		
-		
-			<div id="map_canvas" style="width:500px; height:500px; text-align: center; margin: 0px;"></div>
-			</div>
-<div id="result"></div>
- 
+	<input id="submit" class="ui-button ui-corner-all ui-widget" type="button" name="submit" value="Get The Fair">
+	<input id="btnClear" class="ui-button ui-corner-all ui-widget" type="button" value="Clear">
+	</form>
+	</div>
+</div>
+	
+
+<div id="result" class=' resultcontainer ui-widget-content'>
+<div id='uberdata' class='resulthead ui-widget'>
+
+<div style="line-height:0px;vertical-align: top;height:50px;padding-top:0px;">
+<img align='left'  width='90px' height='70px' src="../static/images/Uber_Logotype_Digital_black.png"  alt="lyft"/>
+</div>
+
+<div class='provider-content'>
+<table cellpadding="10" id="uberresultcontainer">
+	<tr style="color:#36003d;font-weight:bold"><td>Price</td><td>Time</td><td>Distance</td><td>Ride Type</td></tr>
+	<tr>
+		<td><span class="price">0 $</span></td>
+		<td><span class="time">0 min</span>		</td>
+		<td><span class="distance">0 mile</span></td>
+		<td><span class="ridetype">NA</span></td>
+
+	</tr>
+</table>
+ </div>
+</div>
+	<hr/>
+<div id='lyftdata' class='resulthead ui-widget'>
+
+<div class='lyftlogo' style="line-height:0px;vertical-align: top;height:50px">
+<img align='left' style='padding-left:14px;'  width='50px' height='35px' src="../static/images/lyft_logo_tiny_pink.png"  alt="lyft"/>
+
+</div>
+<div  class='provider-content'>
+<table cellpadding="10" id="lyftresultcontainer" >
+	<tr  style="color:#36003d;font-weight:bold"><td>Price</td><td>Time</td><td>Distance</td><td>Ride Type</td></tr>
+	<tr>
+		<td><span class="price">0 $</span></td>
+		<td><span class="time">0 min</span>		</td>
+		<td><span class="distance">0 mile</span></td>
+		<td><span class="ridetype">NA</span></td>
+
+	</tr>
+</table>
+ </div>
+</div>
+	<hr/>
+<div id='routedata' class='resulthead ui-widget'>
+
+<div class='' style="line-height:0px;vertical-align: top;">
+<span class="header font" style='padding-left:14px'>Below are suggested route</span>
+
+</div>
+<div  class='provider-content'>
+<ul id="addresslist"></ul>
+ </div>
+	</div>
+
+
+</div>
+
+<div id="map" resulthead ui-widget style="width:800px;height:700px"></div>
+ </div>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
- 
+ <div id="modal" class="modal" > Loading...
+ </div>
  
 </body>
 

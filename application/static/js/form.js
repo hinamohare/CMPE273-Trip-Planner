@@ -1,7 +1,23 @@
+$( document ).ajaxStart(function() {
+  //$( "#loading" ).show();
+});
 $(document).ready(function(){
+        var dialog = $( "#modal" ).dialog({
+        autoOpen: false,
+        height: 50,
+        width: 100,
+        modal: true
+        });
+
+                $("#frmAddress").validate();
         // click on button submit
         $("#submit").on('click', function(){
-			
+
+        if ($('#frmAddress').valid()) {
+        } else {
+            //alert("form is invalid");
+            return false;
+        }
 			var inputdata = getpayloaddata();
 			
 			console.log(inputdata);
@@ -11,18 +27,121 @@ $(document).ready(function(){
 				contentType:'application/json',
                 datatype : 'json', // data type
                 data : inputdata, // post data || get data
+
+                beforeSend:function(){
+                    //alert('before');
+                    $("#modal").parent().find(".ui-dialog-titlebar").hide();
+                    dialog.dialog( "open" );},
+                    //$('#modal').addClass("loading");
+                    //$('#modal').show();
                 success : function(result) {
                     // you can see the result from the console
                     // tab of the developer tools
-                    console.log(result);
+                    //console.log(result);
+					showoutput(result);
                 },
                 error: function(xhr, resp, text) {
                     console.log(xhr, resp, text);
+                },
+                complete:function()
+                {
+                    dialog.dialog( "close" );
+                    //$('#modal').removeClass("loading");
+                    // $('#modal').hide();
                 }
             })
         });
+		$('#btnAddMoreAddress').on('click',function(){
+			
+			 if (counter == limit)  {
+
+              alert("You have reached the limit of adding " + counter + " Location");
+
+         }
+
+         else {
+			var divName ='';
+			var txtId = 'loc' + counter;
+			var trId = 'trloc' + counter;
+              var newtr = "<tr id='" +trId+"'><td>Location " + (counter) + " </td>:<td><input required type='text' class = 'otherlocation' id = '"+txtId+"' size='50' name='others' placeholder='Enter location' autocomplete='off'><span class='remloc'>[ Remove ]</span></td></tr>";
+              $('#tblAddress tr:last').after(newtr);
+			  var loc = document.getElementById(txtId);
+			  var locautoComplete = new google.maps.places.Autocomplete(loc);
+
+              counter++;
+		 }
+             $('.remloc').on('click', function(){
+            //alert('text');
+            var self = this;
+            $(self).parent().parent('tr').remove();
+            });
+		});
 		
-		
+		function showoutput(result)
+		{
+		var objOutput = $.parseJSON(result);
+		var startdata = objOutput.start;
+		var enddata =objOutput.end;
+		var providerdata = objOutput.providers;
+		if(providerdata && providerdata.length >0)
+        {
+            for(var idx=0;idx<providerdata.length;idx++)
+            {
+                setprovidermetrics(providerdata[idx]);
+            }
+        }
+		var bestroutedata =objOutput.best_route_by_costs;
+		//$($('.startaddress')[0]).text(startdata.address);
+		//$($('.endaddress')[0]).text(enddata.address);
+		var itemhtml ='';
+           itemhtml += '<li  class="startaddress">'+startdata.address+'  ↓  </li>';
+        if(bestroutedata && bestroutedata.length >0)
+        {
+
+        for(var idx=0;idx<bestroutedata.length;idx++)
+        {
+        var itemaddress = bestroutedata[idx].address;
+         itemhtml+='<li>'+itemaddress +'  ↓  </li>'
+        console.log(itemaddress);}
+        }
+
+        itemhtml += '<li  class="endaddress">'+enddata.address+'</li>'
+
+        $('#addresslist').empty();
+        $('#addresslist').append(itemhtml);
+
+
+		}
+		function setprovidermetrics(data)
+		{
+		    var provider = data.name;
+		    var containerid = '';
+		    if(provider ==='Lyft')
+		    {
+		    containerid ="#lyftresultcontainer";
+		    }
+
+		    if(provider ==='Uber')
+		    {
+		    containerid ="#uberresultcontainer";
+		    }
+
+            var pricedata = data.total_costs_by_cheapest_car_type +' '+data.currency_code;
+            $($(containerid + ' .price')[0]).text(pricedata);
+             var timedata = data.total_duration +' '+data.duration_unit;
+            $($(containerid +' .time')[0]).text(timedata);
+            var distancedata = data.total_distance +' '+data.distance_unit;
+            $($(containerid +' .distance')[0]).text(distancedata);
+
+            $($(containerid + ' .ridetype')[0]).text(data.car_type);
+
+
+		}
+		$('#btnClear').on('click',function(){
+			$('#addresslist').empty();
+			
+		});
+	
 		function getpayloaddata()
 		{
 			var startPoint = $('#start').val();
@@ -65,4 +184,31 @@ $(document).ready(function(){
 			return locations
 			
 		}
+		
+
     });
+	
+	function addInput(divName){
+
+         if (counter == limit)  {
+
+              alert("You have reached the limit of adding " + counter + " Location");
+
+         }
+
+         else {
+
+              var newdiv = document.createElement('div');
+			  var txtId = 'loc' + counter
+              newdiv.innerHTML = "<b>Location " + (counter) + " :<b> <input type='text' class = 'otherlocation' id = '"+txtId+"' size='50' name='others' placeholder='Enter location' autocomplete='off'><br><Br>";
+              document.getElementById(divName).appendChild(newdiv);
+			  var loc = document.getElementById(txtId);
+			  var locautoComplete = new google.maps.places.Autocomplete(loc);
+
+              counter++;
+
+         }
+
+    }
+	
+	
