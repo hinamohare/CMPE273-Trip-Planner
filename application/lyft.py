@@ -41,15 +41,23 @@ class LyftApi:
         cost_resp = requests.get(lyft_cost_url, headers={'Authorization': mytoken})
         cost_data = cost_resp.content
         cost_json = json.loads(cost_data)
-        ride_data = cost_json["cost_estimates"][2]  # cheapest ride among Lyft, Lyft Plus and Lyft Line is Lyft
-        ride_type = ride_data["ride_type"]  # ride type
-        ride_time = ride_data["estimated_duration_seconds"] / 60  # time in minutes
-        ride_cost = ride_data["estimated_cost_cents_max"] / 100  # max cost in USD
-        ride_distance = ride_data["estimated_distance_miles"]  # distance in mile
+        if "cost_estimates" in cost_json:
+            indx = len(cost_json["cost_estimates"])
+            ride_data = cost_json["cost_estimates"][indx-1]  # cheapest ride among Lyft, Lyft Plus and Lyft Line is Lyft
+            ride_type = ride_data["ride_type"]  # ride type
+            ride_time = ride_data["estimated_duration_seconds"] / 60  # time in minutes
+            ride_cost = ride_data["estimated_cost_cents_max"] / 100  # max cost in USD
+            ride_distance = ride_data["estimated_distance_miles"]  # distance in mile
+        else:
+            ride_type = "Not available"
+            ride_cost = 9998
+            ride_time = 0
+            ride_distance = 0
+
         lyft_cost_info = {"service_provider": "Lyft",
                           "car_type": ride_type,
                           "costs_by_cheapest_car_type": ride_cost,
                           "duration": ride_time,
                           "distance": ride_distance}
+                              
         return lyft_cost_info
-
