@@ -20,7 +20,7 @@ app = Flask(__name__) #define app using Flask
 
 
 #************************************  database config information    ********************************#
-app.config['SQLALCHEMY_DATABASE_URI']  = 'mysql+pymysql://hina:hina@127.0.0.1:3306/address'
+app.config['SQLALCHEMY_DATABASE_URI']  = 'mysql+pymysql://root:root@127.0.0.1:3306/address'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
@@ -159,35 +159,6 @@ def get_distance(origin_address, destination_address):
     return s
 
 
-def get_optimum_route(locations_list,origin_address, destination_address):
-    """
-    obtain the ordered list of the optimum route for the intermediate locations using google api
-    :param locations_list: list of intermediate locations
-    :param origin_address: starting point address of travel
-    :param destination_address: end point address of travel
-    :return: update the global list optimized_route containing dictionary of
-            intermediate location's address, lattitude and longitude organized in optimum way
-    """
-
-    # building the url for getting optimum path
-    origin = origin_address.replace(" ","+")
-    destination = destination_address.replace(" ","+")
-    addresses = ""
-    for L in locations_list :
-        addresses = addresses + "|"+ L["address"].replace(" ","+")
-    url = "https://maps.googleapis.com/maps/api/directions/json?origin="+origin+"&destination="+destination+"&waypoints=optimize:true"+ addresses+"&key=AIzaSyBq3bKwekCVVP7k_K2788yvA1NwUMwM3ms"
-    response = urllib2.urlopen(url)  # call the google api using url provided
-    json_response = response.read()
-    jsonList = json.loads(json_response)
-
-    # google returns the optimized route depending upon the distance
-    waypoint_order = jsonList["routes"][0]["waypoint_order"]
-
-    global optimized_route
-    for index in waypoint_order :
-        optimized_route.append(locations_list[index])
-    return
-
 def get_Lyft_details_direct():
     """
     When there are no middle/intermediate points on the route, calculates cost, distance and duration for trip for lyft
@@ -237,6 +208,19 @@ def get_Lyft_details():
     lat2 = optimized_route[0]["lat"]
     lng2 = optimized_route[0]["lng"]
     drive_data = LyftApi.getLyftCost(lat1,lng1,lat2,lng2)
+    if drive_data["car_type"] == "Not available":
+        lyft_data = {
+        "name": drive_data["service_provider"],
+        "car_type": drive_data["car_type"],
+        "total_costs_by_cheapest_car_type": 0,
+        "currency_code": "USD",
+        "total_duration": 0,
+        "duration_unit": "minute",
+        "total_distance": 0,
+        "distance_unit": "mile"
+        }
+        return lyft_data
+        
     total_cost = drive_data["costs_by_cheapest_car_type"]
     total_distance = drive_data["distance"]
     total_duration = drive_data["duration"]
@@ -249,6 +233,18 @@ def get_Lyft_details():
         lat2 = optimized_route[i+1]["lat"]
         lng2 = optimized_route[i+1]["lng"]
         drive_data = LyftApi.getLyftCost(lat1, lng1, lat2, lng2)
+        if drive_data["car_type"] == "Not available":
+            lyft_data = {
+            "name": drive_data["service_provider"],
+            "car_type": drive_data["car_type"],
+            "total_costs_by_cheapest_car_type": 0,
+            "currency_code": "USD",
+            "total_duration": 0,
+            "duration_unit": "minute",
+            "total_distance": 0,
+            "distance_unit": "mile"
+            }
+            return lyft_data
         total_cost = total_cost+ drive_data["costs_by_cheapest_car_type"]
         total_distance = total_distance + drive_data["distance"]
         total_duration = total_distance + drive_data["duration"]
