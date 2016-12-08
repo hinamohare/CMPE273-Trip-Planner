@@ -87,7 +87,7 @@
 
                     <script>
                         $(document).ready(function () {
-                            $("#demo3 .stars").click(function () {
+                            $("#rating .stars").click(function () {
 
                                 var label = $("label[for='" + $(this).attr('id') + "']");
                                 
@@ -109,11 +109,25 @@
         <p><span class="glyphicon glyphicon-phone"></span> +00 1515151515</p>
         <p><span class="glyphicon glyphicon-envelope"></span> myemail@tripplanner.com</p>
     </div>
+
     
+    <form action="http://127.0.0.1:5000/v1/reviews" method="POST">
     <div class="col-sm-7">
         <div class="row">
           <div class="col-sm-3 form-group">
-            <fieldset id='demo3' class="rating">
+            <h4>Enter your Trip ID:</h4>
+          </div>
+          <div class="col-sm-3 form-group" id="trip_id">
+            <input class="form-control" id="rating" name="rating" placeholder="Trip ID" type="text">
+          </div>
+        </div>
+
+        <div class="row">
+        <div class="col-sm-3 form-group">
+            <h4>Rate your Trip:</h4>
+          </div>
+          <div class="col-sm-3 form-group">
+            <fieldset id='rating' class="rating">
                           <input class="stars" type="radio" id="star53" name="rating" value="5" />
                           <label class = "full" for="star53" title="Awesome - 5 stars"></label>
 
@@ -139,18 +153,17 @@
                           <label class="half" for="star1half3" title="Meh - 1.5 stars"></label>
                           
                           <input class="stars" type="radio" id="star13" name="rating" value="1" />
-                          <label class = "full" for="star13" title="Sucks big time - 1 star"></label>
+                          <label class = "full" for="star13" title="Not Good Enough - 1 star"></label>
                           
                           <input class="stars" type="radio" id="starhalf3" name="rating" value="0.5" />
-                          <label class="half" for="starhalf3" title="Sucks big time - 0.5 stars"></label>
+                          <label class="half" for="starhalf3" title="Not Good Enough - 0.5 stars"></label>
                       </fieldset> 
           </div>          
-        </div>
-        <div class="row">
           <div class="col-sm-3 form-group" id="feedback">
-            <input class="form-control" id="rating" name="rating" placeholder="Rating" type="text">
+         
           </div>
         </div>
+
         <div class="row">
           <textarea class="form-control" id="review" name="review" placeholder="Review" rows="5"></textarea><br>
         </div>
@@ -160,6 +173,8 @@
           </div>
         </div>
     </div>
+    </form>
+
 
   </div>
 </div>
