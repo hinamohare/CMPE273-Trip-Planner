@@ -2,7 +2,23 @@
 <html>
 <head>
 <title>Trip Planner </title>
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyAAOiIC-ovRk8X0mwHL6BVd_MN0G8ZJPGo"></script>
+<script>
+      function initMap() {
+        var uluru = {lat: -25.363, lng: 131.044};
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: uluru
+        });
+        var marker = new google.maps.Marker({
+          position: uluru,
+          map: map
+        });
+      }
+    </script>
+    <!--<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbZ8DodbHLUAJX9P4NZUoGLSsS2kqjDE4&callback=initMap">
+    </script> -->
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyAAOiIC-ovRk8X0mwHL6BVd_MN0G8ZJPGo&callback=initMap"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <!--script type=text/javascript src = "{{ url_for('static', filename = 'js/jquery-ui-1.12.1.custom/external/jquery/jquery.js') }}"></script-->
 <script type=text/javascript src = "{{ url_for('static', filename = 'js/jquery-ui-1.12.1.custom/jquery-ui.js') }}"></script>
@@ -14,8 +30,6 @@
 <script>
 /*
 $(document).ready(function(){
-
-
         var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
      var myOptions = {
          zoom: 4,
@@ -64,6 +78,7 @@ function initializemap(){
 //google.maps.event.addDomListener(window,'load', initializemap);
 
 </script>
+
 <title> TRIP PLANNER </title>
 <style>
 .aligncenter {
@@ -210,13 +225,13 @@ width:830px;
 
 </div>
 <div style="padding:20px" ><a href='/postreviews' style="font-size:25px">Post Reviews</a></div>
+    <a href='/test1' style="font-size:25px;margin-left:20px">Check your direction</a>
 <div id="map" resulthead ui-widget style="width:800px;height:700px"></div>
 
- </div>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
  <div id="modal" class="modal" > Loading...
  </div>
- 
+
 </body>
 
 </html>
