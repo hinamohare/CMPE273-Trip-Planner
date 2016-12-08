@@ -364,7 +364,9 @@ def get_Uber_details():
     }
     return uber_data
 #***************************************code for user interface*************************************#
-
+@app.route('/test1')
+def test1():
+    return render_template('test1.html')
 
 @app.route('/')
 def index():
