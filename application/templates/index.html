@@ -14,6 +14,8 @@
 <script>
 /*
 $(document).ready(function(){
+
+
         var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
      var myOptions = {
          zoom: 4,
@@ -39,8 +41,11 @@ $(document).ready(function(){
 	}
 	
 	google.maps.event.addDomListener(window, 'load', initialize);
+
 	var counter = 1;
+
     var limit = 5;
+
 function initializemap(){
      var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
      var myOptions = {
@@ -55,10 +60,11 @@ function initializemap(){
       title:"Fast marker"
      });
 }
-//google.maps.event.addDomListener(window,'load', initializemap);
-</script>
 
-	<title> TRIP PLANNER </title>
+//google.maps.event.addDomListener(window,'load', initializemap);
+
+</script>
+<title> TRIP PLANNER </title>
 <style>
 .aligncenter {
 	width: 900px;
@@ -72,6 +78,7 @@ function initializemap(){
 	
   }
   .resulthead {
+
     
 	margin-top:2px;
 	padding:30px 10px 10px 20px;
@@ -99,6 +106,7 @@ function initializemap(){
  }
  .header {font-size:20px;color:#DFDF;}
  .maininner{padding-left:0px;}
+
 .ui-dialog-titlebar-close{
     display: none;
 }
@@ -110,19 +118,20 @@ width:830px;
 <body>
 <div id='container' class='aligncenter' >
 <div class='mainheader '>
-<img  src="../static/images/logo.png" alt="Travel Planner">
+<img  src="{{ url_for('static', filename = 'images/logo.png') }}" alt="Travel Planner">
 
 </div>
-<a href='/waiting' >For waiting at intermdiate locations use this service</a>
-<a href='/bestreviews' style="float: right">Best Rated Routes</a><br>
+
+
 <div class='mhsection ui-corner-all ui-widget  ui-widget-content'>
+
 <div class='maininner '>
 <form   id="frmAddress">
 
 	<table id='tblAddress' cellspacing='15'>
-	<tr ><td>Starting Point</td><td><input id="start" required value='Foster City, CA, United States' class='ui-autocomplete-input' name ="start" type="text" size="50" placeholder="Choose starting point..." autocomplete="off">
+	<tr ><td>Starting Point</td><td><input id="start" required  class='ui-autocomplete-input' name ="start" type="text" size="50" placeholder="Choose starting point..." autocomplete="off">
 	</td></tr>
-	<tr><td>Destination</td><td><input id="end" required value='San Jose, CA, United States' class='ui-autocomplete-input' name = "end" type="text" size="50" placeholder="Choose destination..." autocomplete="off">
+	<tr><td>Destination</td><td><input id="end" required  class='ui-autocomplete-input' name = "end" type="text" size="50" placeholder="Choose destination..." autocomplete="off">
 	</td></tr>
 	
 	</table>
@@ -135,6 +144,9 @@ width:830px;
 	<input id="btnClear" class="ui-button ui-corner-all ui-widget" type="button" value="Clear">
 	</form>
 	</div>
+	<br>
+	<a href='/waiting' >For waiting at intermdiate locations use this service</a>
+	<a href='/bestreviews' style="float: right">Best Rated Routes</a><br>
 </div>
 	
 
@@ -142,7 +154,7 @@ width:830px;
 <div id='uberdata' class='resulthead ui-widget'>
 
 <div style="line-height:0px;vertical-align: top;height:50px;padding-top:0px;">
-<img align='left'  width='90px' height='70px' src="../static/images/Uber_Logotype_Digital_black.png"  alt="lyft"/>
+<img align='left'  width='90px' height='70px' src= "{{ url_for('static', filename = 'images/Uber_Logotype_Digital_black.png') }}"  alt="Uber"/>
 </div>
 
 <div class='provider-content'>
@@ -152,18 +164,18 @@ width:830px;
 		<td><span class="price">0 $</span></td>
 		<td><span class="time">0 min</span>		</td>
 		<td><span class="distance">0 mile</span></td>
-		<td><span class="ridetype">NA</span></td>
+		<td><span class="ridetype">  -</span></td>
 
 	</tr>
 </table>
-	<a href="https://www.uber.com/info/scheduled-rides/">Click to schedule your ride</a>
+	<a href="https://www.uber.com/info/scheduled-rides/" style="margin-left: 10px">Click to schedule your ride</a>
  </div>
 </div>
 	<hr/>
 <div id='lyftdata' class='resulthead ui-widget'>
 
 <div class='lyftlogo' style="line-height:0px;vertical-align: top;height:50px">
-<img align='left' style='padding-left:14px;'  width='50px' height='35px' src="../static/images/lyft_logo_tiny_pink.png"  alt="lyft"/>
+<img align='left' style='padding-left:14px;'  width='50px' height='35px' src="{{ url_for('static', filename = 'images/lyft_logo_tiny_pink.png') }}"  alt="lyft"/>
 
 </div>
 <div  class='provider-content'>
@@ -173,21 +185,23 @@ width:830px;
 		<td><span class="price">0 $</span></td>
 		<td><span class="time">0 min</span>		</td>
 		<td><span class="distance">0 mile</span></td>
-		<td><span class="ridetype">NA</span></td>
+		<td><span class="ridetype">  -</span></td>
 
 	</tr>
-
 </table>
-	<a href="https://www.lyft.com/app">Click to schedule your ride</a>
+	<a href="https://www.lyft.com/app" style="margin-left: 10px">Click to schedule your ride</a>
  </div>
 </div>
 	<hr/>
 <div id='routedata' class='resulthead ui-widget'>
 
 <div class='' style="line-height:0px;vertical-align: top;">
-<span class="header font" style='padding-left:14px'>Below are suggested route</span>
+<span class="header font" style='padding-left:14px; color:#36003d'>Below are suggested route</span>
 
 </div>
+
+
+
 <div  class='provider-content'>
 <ul id="addresslist"></ul>
  </div>
@@ -195,8 +209,9 @@ width:830px;
 
 
 </div>
-
+<div style="padding:20px" ><a href='/postreviews' style="font-size:25px">Post Reviews</a></div>
 <div id="map" resulthead ui-widget style="width:800px;height:700px"></div>
+
  </div>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
  <div id="modal" class="modal" > Loading...
