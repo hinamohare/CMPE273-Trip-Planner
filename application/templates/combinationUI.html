@@ -1,39 +1,25 @@
 <!Doctype html>
 <html>
 <head>
-
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=AIzaSyAAOiIC-ovRk8X0mwHL6BVd_MN0G8ZJPGo"></script>
 <script>
 	function initialize()
 	{	
 		var start = document.getElementById('start');
 		var end = document.getElementById('end');
+		var inter1 = document.getElementById('inter1');
+		var inter2 = document.getElementById('inter2');
 		
 		var startautoComplete = new google.maps.places.Autocomplete(start);
 		var endautoComplete = new google.maps.places.Autocomplete(end);
+		var inter1autoComplete = new google.maps.places.Autocomplete(inter1);
+		var inter1autoComplete = new google.maps.places.Autocomplete(inter2);
 		
 	}
 	
 	google.maps.event.addDomListener(window, 'load', initialize);
-	var counter = 1;
-    var limit = 50;
-    function addInput(divName){
-         if (counter == undefined)
-        {
-            counter = 1;
-        }
-         if (counter == limit)  {
-              alert("1 You have reached the limit of adding " + counter + " Location");
-         }
-         else {
-              var newdiv = document.createElement('div');
-			  var txtId = 'loc' + counter
-              newdiv.innerHTML = "<b>Location " + " :<b> <input type='text' class = 'otherlocation' id = '"+txtId+"' size='50' name='others' placeholder='Enter location' autocomplete='off'><br><Br>";
-              document.getElementById(divName).appendChild(newdiv);
-			  var loc = document.getElementById(txtId);
-			  var locautoComplete = new google.maps.places.Autocomplete(loc);
-              counter++;
-         }
-    }
+
+
 </script>
 
 </head>

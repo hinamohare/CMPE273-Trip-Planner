@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table, th, td {
+    border: 1px solid black;
+}
+</style>
+</head>
+<body>
+<center>
+<h2><font color="blue">Trip Planner!</font></h2></center>
+<a href='/'>Home</a>
+<h2>Your review is posted!</h2>
+{% block body %}
+    <p>Trip ID : {{ record.trip_id }}<br>
+    <p>From : {{ record.start }}
+    <p>To : {{ record.end }} 
+    <p>Rating : {{ record.rating }}
+    <p>Review : {{ record.review }}
+{% endblock %}
+</body>
+</html>

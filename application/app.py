@@ -658,8 +658,7 @@ def delete(location_id):
     db.session.commit()
     return "",204
     
-#************************************Trip Planner APIs - POST**************************************#
-
+#************************************Trip Planner APIs - POST**************************************#   
 @app.route('/v1/trips/', methods=['POST'])
 def post_trip():
     input_json = request.get_json(force=True)
@@ -706,8 +705,35 @@ def post_trip():
     #return the trip details to the user in json form
     return jsonify(result=[record.serialize]), 201
 
-@app.route('/v1/reviews/', methods=['POST'])
+@app.route('/reviews', methods=['POST'])
 def post_review():
+    print "\n post_review : got request"
+    trip_id = request.form['trip_id']
+    rating = request.form["rating"]
+    review = request.form["review"]
+    print "\n post_review : ",trip_id, rating, review
+    #insert the trip review into the database
+    tripReview = TripReviews(trip_id,rating,review)
+    rs = db.session.add(tripReview)
+    db.session.flush()
+    rs = db.session.commit()
+    record = TripReviews.query.filter_by(review_id=tripReview.review_id).first_or_404()
+    trip = TripDetails.query.filter_by(trip_id=record.trip_id).first_or_404()
+    start = LocationDetails.query.filter_by(location_id=trip.start_location).first_or_404()
+    end = LocationDetails.query.filter_by(location_id=trip.end_location).first_or_404()
+    data = {
+    "review_id":tripReview.review_id,
+    "trip_id": record.trip_id,
+    "start":start.address.replace("+"," "),
+    "end":end.address.replace("+"," "),
+    "rating":record.rating,
+    "review":record.review}
+    return render_template('reviewPosted.html', record=data)
+    #return the review details to the user in json form
+    
+    
+@app.route('/reviewsJson/', methods=['POST'])
+def post_review_json():
     print "got request"
     input_json = request.get_json(force=True)
     trip_id = request.json["trip_id"]
@@ -720,14 +746,35 @@ def post_review():
     db.session.flush()
     rs = db.session.commit()
     record = TripReviews.query.filter_by(review_id=tripReview.review_id).first_or_404()
-    
-    #return the review details to the user in json form
     return jsonify(result=[record.serialize]), 201
     
-@app.route('/v1/bestreviews/', methods=['GET'])
-def get_best_reviews():
+    
+@app.route('/bestreviewsjson/', methods=['GET'])
+def get_best_reviews_json():
     record = TripReviews.query.filter_by(rating=5)
     return jsonify(json_list=[i.serialize for i in record.all()])
+
+@app.route('/bestreviews/', methods=['GET'])
+def get_best_reviews():
+    records = TripReviews.query.filter_by(rating=5)
+    trips = []
+    for record in records:
+        trip = TripDetails.query.filter_by(trip_id=record.trip_id).first_or_404()
+        start = LocationDetails.query.filter_by(location_id=trip.start_location).first_or_404()
+        print "\n id = ", start.location_id
+        end = LocationDetails.query.filter_by(location_id=trip.end_location).first_or_404()
+        data = {
+        "trip_id": record.trip_id,
+        "start":start.address.replace("+"," "),
+        "end":end.address.replace("+"," "),
+        "rating":record.rating,
+        "review":record.review}
+        trips.append(data)
+    return render_template('bestReviews.html', records=trips)
+    
+@app.route('/postreviews')
+def postreviews():
+    return render_template('reviews.html')
 
 #************************************Combination Route**************************************#
 @app.route('/waiting')
@@ -744,10 +791,6 @@ def getCombinationPrice():
     returns the optimum route solution for the input locations based on cost provided by Lyft and Uber
     :return: json_result
     """
-    print "\n\n getCombinationPrice started"
-    print "\n request : ", request
-    print "\n request start : ", request.form['start']
-    print "\n request end : ", request.form['end']
     global start_point
     global end_point
     global no_inter_points
@@ -801,6 +844,58 @@ def getCombinationPrice():
         #return json_result
         return render_template('combinationResp.html', result=bestRt)
 
+@app.route('/combinationPriceJson',methods = ['POST'])
+def getCombinationPriceJson():
+    """
+    returns the optimum route solution for the input locations based on cost provided by Lyft and Uber
+    :return: json_result
+    """
+    global start_point
+    global end_point
+    global no_inter_points
+
+    startlocation = request.json["startlocation"] # starting point of the travel
+    location = startlocation.replace(" ","+")
+    adrs = get_location_db(location, "start")
+    #print "\n\n\n new func    ", adrs.lat, adrs.lng
+    start_point["lat"] = adrs.lat
+    start_point["lng"] = adrs.lng
+    start_point["address"]= startlocation
+    
+    endlocation = request.json["endlocation"] # end point of the travel
+    location = endlocation.replace(" ", "+")
+    result = get_location_db(location, "end")
+    end_point["address"] = endlocation
+    end_point["lat"] = result.lat
+    end_point["lng"] = result.lng
+    #print "\n End point \n", end_point
+    
+    dist = get_distance(start_point,end_point)   
+    original_list = request.json["intermidiatelocation"] # list containing the intermediate locations
+    
+    no_inter_points = len(original_list)
+    if no_inter_points>0 :
+        intermediate_address_lat_lng = get_details(original_list) # get the latitude and longitude of the intermediate locations
+        bestRt = get_best_price(intermediate_address_lat_lng, start_point, end_point)
+        print "\n\n optimized_route2 = ", bestRt
+        for i in bestRt:
+            i["end"].pop('location_id', None)
+            i["start"].pop('location_id', None)
+        json_result = json.dumps(bestRt)
+        print "\n\n\n final answer : ",json_result
+        return json_result
+       
+    else:
+        emptyLocs = []
+        bestRt = get_best_price(emptyLocs, start_point, end_point)
+        print "\n\n optimized_route1 = ", bestRt
+        bestRt[0]["end"].pop('location_id', None)
+        bestRt[0]["start"].pop('location_id', None)
+        json_result = json.dumps(bestRt)
+        print "\n\n\n final answer1 : ",json_result
+        return json_result
+        
+        
 def get_price_2dest(start_point, end_point):
     print "\n get_price_2dest 1"
     lat1 = start_point["lat"]

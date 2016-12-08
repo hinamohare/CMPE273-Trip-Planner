@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table, th, td {
+    border: 1px solid black;
+}
+</style>
+</head>
+<body>
+<center>
+<h2><font color="blue">Trip Planner!</font></h2></center>
+<a href='/'>Home</a>
+<h2>The best rated trip routes!</h2>
+{% block body %}
+<table style="width:100%">
+    <th>Trip ID</th>
+    <th>From</th>
+    <th>To</th>
+    <th>Rating </th>
+    <th>Review </th>
+{% for record in records %}
+   <tr>
+        <td> {{ record.trip_id }} </td>
+        <td> {{ record.start }} </td>
+        <td> {{ record.end }} </td>
+        <td> {{ record.rating }} </td>
+        <td> {{ record.review }} </td>
+   </tr>
+{% endfor %}
+</table>
+{% endblock %}
+</body>
+</html>
