@@ -4,7 +4,7 @@ Team members -
 Harshada Bhide-Apte
 Heena Mohare
 Natasha Dsouza
-veereshkamble
+Veeresh Kamble
 
 Trip Planner - This application shows the best distance path and best cost path for given locations alongwith cooresponding Uber and Lyft estimates.
 
@@ -34,6 +34,9 @@ This screen provides the list of all the routes generated on this application fo
 Post Review screen - http://localhost:5000/postreviews
 On this screen user can enter the trip id and post rating (1-5 stars) and review for that trip.
 
+Map screen - http://localhost:5000/MapScreen
+This scrren provides the functionality of viewing your start to end direction service on the map.
+
 Steps to run the code:
 - Start the database:
     - Create database with name "address"
@@ -42,4 +45,4 @@ Steps to run the code:
 - Start the Server: 
     - Run app.py file on your preferred IDE/ Command Prompt
 - Start Client:
-    -  On your browser "http://localhost:5000/"
+    -  View the application at: "http://localhost:5000/"
